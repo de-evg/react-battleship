@@ -1,10 +1,10 @@
 export const ActionType = {
-  INIT: `INIT`
+  CHANGE_GAME_MODE: `CHANGE_GAME_MODE`
 };
 
 export const ActionCreator = {
-  initBattlefield: (filed) => ({
-    type:`INIT`,
-    payload: filed
+  changeGameMode: (mode) => ({
+    type:`CHANGE_GAME_MODE`,
+    payload: mode
   })
 };
