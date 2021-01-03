@@ -1,0 +1,596 @@
+body {
+  margin: 0;
+  background-color: lightskyblue;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.seabattle {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+.game__container {
+  margin: 0 auto;
+  padding-top: 25%;
+  width: 400px;
+  display: flex;
+  justify-content: center;
+}
+
+.header {
+  margin-bottom: 20px;
+  padding: 0 110px;
+  border-bottom: 2px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.nav {
+  padding: 20px 0;
+  display: flex;
+}
+
+.nav__item {
+  margin-right: 20px;
+  text-align: center;
+  min-width: 220px;
+  min-height: 30px;
+  background-color: #fff;
+  border-radius: 25px;
+
+  text-decoration: none;
+  color: #000;
+  font-family: "Arial", sans-serif;
+  font-size: 25px;
+}
+
+.title {
+  font-family: "Arial", sans-serif;
+}
+
+.visually--hidden:not(:focus):not(:active) {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+}
+
+.game-board h2 {
+  text-align: center;
+  font-size: 14px;
+}
+
+.game-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.square {
+  box-sizing: border-box;
+  width: 29px;
+  height: 29px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: lightgray;
+}
+
+.game__column-name {
+  display: flex;
+  align-self: flex-end;
+}
+
+.game__column-name .square {
+  border-right: 2px solid grey;
+}
+
+.game__column-name .square:first-child {
+  border-bottom: 2px solid grey;
+}
+
+.game__row-name .square {
+  border-bottom: 2px solid grey;
+}
+
+.battlefield {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.battlefield .square {
+  box-sizing: border-box;
+  border: 2px solid grey;
+  border-top: none;
+  border-left: none;
+
+  background-color: lightskyblue;
+}
+
+.battlefield__square:hover {
+  background-color: rgba(135, 206, 250, 0.8);
+}
+
+.battlefield__square:active {
+  background-color: rgba(135, 206, 250, 0.7);
+}
+
+.battlefield ul .square:first-child {
+  border-top: none;
+}
+
+.battlefield ul:first-child .battlefiel__square {
+  border-left: none;
+}
+
+.btn {
+  margin: 0 20px;
+  background-color: #002fff88;
+  border-radius: 30px;
+  border: none;
+  box-shadow: 0px 8px 11px 3px #002fff57;
+
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+}
+
+.seabattle__place-ship-text {
+  margin-bottom: 10px;
+  padding: 0;
+  text-align: center;
+}
+
+.seabattle__place-ship-btn {
+  margin-bottom: 10px;
+}
+
+.seabattle__rotate-ship-btn {
+  margin-bottom: 10px;
+}
+
+.battlefield .ship {
+  background-color: black;
+}
+
+.battlefield .miss {
+  background: radial-gradient(
+    farthest-corner,
+    rgb(0, 68, 255),
+    lightskyblue,
+    rgb(23, 143, 255),
+    lightskyblue,
+    lightskyblue
+  );
+}
+
+.battlefield .hit {
+  position: relative;
+  background-color: darkred;
+}
+
+.battlefield .hit::before {
+  position: absolute;
+  content: "";
+  top: 12px;
+  left: -3px;
+  width: 35px;
+  height: 2px;
+  transform: rotate(45deg);
+  background-color: rgba(61, 12, 12, 0.5);
+}
+
+.battlefield .hit::after {
+  position: absolute;
+  content: "";
+  top: 12px;
+  left: -3px;
+  width: 35px;
+  height: 2px;
+  transform: rotate(-45deg);
+  background-color: rgba(61, 12, 12, 0.5);
+}
+
+.battlefield .destroyed {
+  position: relative;
+  background-color: rgba(12, 17, 61, 0.7);
+}
+
+.battlefield .destroyed::before {
+  position: absolute;
+  content: "";
+  top: 12px;
+  left: -3px;
+  width: 35px;
+  height: 2px;
+  transform: rotate(45deg);
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.battlefield .destroyed::after {
+  position: absolute;
+  content: "";
+  top: 12px;
+  left: -3px;
+  width: 35px;
+  height: 2px;
+  transform: rotate(-45deg);
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.battlefield .lastshot {
+  box-shadow: inset 0 0 20px #f84e4e;
+  animation: lastshot 1.6s;
+}
+
+.message-container {
+  position: absolute;
+  width: 248px;
+  height: 60px;
+  top: 50%;
+  left: 100%;
+  transform: translate(-100%, 50%);
+  border-radius: 25px;
+
+  background-color: rgba(0, 183, 255, 0.479);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.message {
+  text-align: center;
+  padding: 0 50px;
+  font-family: "Arial", serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+}
+
+.ships-list {
+  padding-right: 30px;
+  padding-left: 80px;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.ships-list li {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.ships-list li::before {
+  position: absolute;
+  content: "";
+  width: 30px;
+  height: 0;
+  border-top: 10px solid rgb(0, 0, 0);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+
+  top: 50%;
+  left: -60px;
+  transform: translateY(-50%);
+}
+
+.ships-list li::after {
+  position: absolute;
+  content: "";
+  border: 10px solid transparent;
+  border-top-color: rgb(0, 0, 0);
+
+  top: 35%;
+  left: -50px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.ships-list span {
+  font-weight: 700;
+}
+
+@keyframes lastshot {
+  0% {
+    box-shadow: inset 0 0 0px #f84e4e;
+  }
+
+  25% {
+    box-shadow: inset 0 0 20px #f84e4e;
+  }
+
+  50% {
+    box-shadow: inset 0 0 0px #f84e4e;
+  }
+
+  100% {
+    box-shadow: inset 0 0 20px #f84e4e;
+  }
+}
+
+.container {
+  flex-direction: column;
+}
+
+.main {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.game__container {
+  margin: 0 auto;
+  padding-top: 100px;
+  width: 600px;
+  display: flex;
+  justify-content: center;
+}
+
+.game-board {
+  min-width: 440px;
+  flex-basis: 440px;
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  padding-left: 135px;
+  align-items: flex-start;
+}
+
+.game-info h2,
+.game-info p {
+  margin: 0;
+  width: 660px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.game-info .swipe {
+  display: none;
+}
+
+.game-info .ships-list {
+  margin-left: auto;
+  padding-right: 135px;
+}
+
+.seabattle__place-ship-text {
+  width: 660px;
+}
+
+.game-info .btn {
+  width: 660px;
+  margin: 0;
+}
+
+.btn {
+  width: 400px;
+  padding: 10px 15px;
+}
+
+.btn:hover,
+.btn:hover {
+  box-shadow: 0px 15px 11px 3px #002fff42;
+}
+
+.btn:focus,
+.btn:focus {
+  outline: none;
+  box-shadow: 0px 2px 5px 3px #002fff56;
+}
+
+.game-name__title {
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.game-name__title span {
+  margin-bottom: 30px;
+}
+
+.game-name__input {
+  width: 370px;
+  padding: 15px 15px;
+  border-radius: 30px;
+  border: 2px solid #00f7ff9d;
+}
+
+.game-name__input:hover {
+  border-color: #00a2ff;
+}
+
+.game-name__input:focus {
+  outline: none;
+  border-color: #002fff;
+}
+
+.game-name__message {
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.board-form {
+  margin: 0 auto;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.board-form__games {
+  margin-bottom: 30px;
+  border: none;
+  border: 4px solid #002fff88;
+  border-radius: 25px;
+}
+
+.board-form__title {
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.board-form .btn {
+  align-self: center;
+  margin-bottom: 30px;
+}
+
+.board-form__games-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.board-form__game-title {
+  position: relative;
+  padding: 10px 0 5px 40px;
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  line-height: 30px;
+
+  padding-left: 40px;
+}
+
+.board-form__game-title::before {
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+  background-color: #002fff88;
+}
+
+.board-form__game-radio {
+  display: none;
+}
+
+.board-form__game-radio:checked + .board-form__game-title::before {
+  background: radial-gradient(
+    circle closest-side,
+    lightskyblue 7px,
+    #002fff88 8px
+  );
+}
+
+.main {
+  width: 100%;
+}
+
+.game {
+  display: flex;
+  flex-wrap: wrap;
+  width: 550px;
+  flex-basis: 320px;
+}
+
+.game__column-name {
+  display: flex;
+}
+
+.square {
+  width: 40px;
+  height: 40px;
+}
+
+.battlefield .destroyed::before {
+  position: absolute;
+  content: "";
+  top: 27px;
+  left: -9px;
+  width: 78px;
+  height: 2px;
+  transform: rotate(45deg);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.battlefield .destroyed::after {
+  position: absolute;
+  content: "";
+  top: 27px;
+  left: -9px;
+  width: 78px;
+  height: 2px;
+  transform: rotate(-45deg);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.ships-list {
+  margin-right: 350px;
+  padding-left: 65px;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.battlefield .hit::before {
+  position: absolute;
+  content: "";
+  top: 27px;
+  left: -9px;
+  width: 78px;
+  height: 2px;
+  transform: rotate(45deg);
+  background-color: rgba(61, 12, 12, 0.5);
+}
+
+.battlefield .hit::after {
+  position: absolute;
+  content: "";
+  top: 27px;
+  left: -9px;
+  width: 78px;
+  height: 2px;
+  transform: rotate(-45deg);
+  background-color: rgba(61, 12, 12, 0.5);
+}
+
+.message-container {
+  width: 400px;
+  height: 60px;
+  top: 65px;
+  left: 50%;
+  transform: translate(-50%);
+  border-radius: 25px;
+
+  background-color: rgba(0, 183, 255, 0.479);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.message {
+  padding: 0 30px;
+  font-family: "Arial", serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+}
