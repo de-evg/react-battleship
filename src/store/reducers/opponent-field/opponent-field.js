@@ -8,8 +8,8 @@ const initialState = {
 
 export const opponentField = (state = initialState, action) => {
   switch (action.type) {
-    case ActionType.INIT_OPPONENT:
-      return {opponentField: action.payload}
+    case ActionType.RESET_OPPONENT_FIELD:
+      return {...state, ...initialState}
   }
   return state;
 };

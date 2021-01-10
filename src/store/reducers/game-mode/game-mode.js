@@ -8,6 +8,8 @@ const initialState = {
 
 export const gameMode = (state = initialState, action) => {
   switch (action.type) {
+    case ActionType.RESET_GAME_MODE:
+      return {...state, ...initialState}
     case ActionType.CHANGE_GAME_MODE:
       return {gameMode: action.payload}
   }

@@ -3,14 +3,20 @@
 import generateShipList from "../../../utils/ships";
 import {ActionType} from "../../action";
 
+const DEFAULT_SHIP_TYPE = 4;
+
 const initialState = {
-  palyerShips: generateShipList()
+  playerShips: generateShipList(),
+  currentShipOnPlace: {},
+  shipTypeOnPlace: DEFAULT_SHIP_TYPE
 };
 
 export const playerShips = (state = initialState, action) => {
   switch (action.type) {
-    case ActionType.INIT_PLAYER_SHIPS:
-      return {palyerShips: action.payload}
+    case ActionType.RESET_USER_SHIPS:
+      return {...state, ...initialState}
+    case ActionType.UPDATE_SHIP_ON_PLACE:
+      return {...state, currentShipOnPlace: action.payload}
   }
   return state;
 };

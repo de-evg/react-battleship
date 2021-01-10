@@ -23,12 +23,8 @@ const OpponentField = ({fieldsData}) => {
         </ul>
         <Battlefield
           playerType={``}
-          fieldsData={fieldsData}
-          shipsData={``}
-          shipOnPlaceData={``}
-          gameMode={``}
           isPlayerMove={``}
-
+          onMouseOverHandler={() => {}}
           handlePlayerMove={() => {}}
           handleMoveClick={() => {}}
         />

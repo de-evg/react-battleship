@@ -8,7 +8,7 @@ import OpponentField from "../opponent-field/opponent-field";
 import UserFiled from "../user-field/user-field";
 import {ActionCreator} from "../../store/action";
 
-const SingleplayerScreen = ({gameMode, updateGameMode}) => {
+const SingleplayerScreen = ({gameMode, updateGameMode, setShipOnPlace, shipTypeOnPlace, shipsData}) => {
 
   useEffect(() => {
     if (gameMode === GameMode.IN_MENU) {
@@ -18,7 +18,9 @@ const SingleplayerScreen = ({gameMode, updateGameMode}) => {
 
   const handlePlaceShipBtnClick = useCallback(() => {
     updateGameMode(GameMode.ARRAGMENT);
-  }, [updateGameMode]);
+    const firstShip = shipsData["deck" + shipTypeOnPlace][0];
+    setShipOnPlace(firstShip);
+  }, [updateGameMode, setShipOnPlace, shipTypeOnPlace, shipsData]);
 
   return (
     <section className={"seabattle"}>
@@ -49,16 +51,24 @@ const SingleplayerScreen = ({gameMode, updateGameMode}) => {
 
 SingleplayerScreen.propTypes = {
   gameMode: PropTypes.string.isRequired,
-  updateGameMode: PropTypes.func.isRequired
+  updateGameMode: PropTypes.func.isRequired,
+  setShipOnPlace: PropTypes.func.isRequired,
+  shipTypeOnPlace: PropTypes.number.isRequired,
+  shipsData: PropTypes.object.isRequired
 };
 
 const mapStateToProps = (state) => ({
-  gameMode: state[NameSpace.GAME_MODE].gameMode
+  gameMode: state[NameSpace.GAME_MODE].gameMode,
+  shipTypeOnPlace: state[NameSpace.PLAYER_SHIPS].shipTypeOnPlace,
+  shipsData: state[NameSpace.PLAYER_SHIPS].playerShips,
 });
 
 const mapDispatchToProps = (dispatch) => ({
   updateGameMode(mode) {
     dispatch(ActionCreator.changeGameMode(mode))
+  },
+  setShipOnPlace(newShip) {
+    dispatch(ActionCreator.updateShipOnPlace(newShip))
   }
 });
 

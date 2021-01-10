@@ -16,3 +16,12 @@ export const generateBasicGameFieldData = () => {
   }
   return basicGameFieldData;
 }
+
+export const checkCoordsOnBlock = (coords, fields) => {
+  const isFieldBlocked = coords.find((coordinate) => {
+    const [columnNumber, rowNumber] = coordinate.split(``);
+    const fieldOnCheck = fields["column" + columnNumber][rowNumber];
+      return fieldOnCheck.isBlocked ? true : false;
+  });
+  return !!isFieldBlocked;
+};
