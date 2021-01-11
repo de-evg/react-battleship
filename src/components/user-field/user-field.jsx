@@ -1,82 +1,295 @@
-import React, {useCallback} from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
-import {connect} from "react-redux";
-import {NameSpace} from "../../store/reducers/root";
+import { connect } from "react-redux";
+import { NameSpace } from "../../store/reducers/root";
 import Battlefield from "../battlefield/battlefield";
-import {GameMode} from "../../const";
-import {ActionCreator} from "../../store/action";
-import {checkCoordsOnBlock} from "../../utils/fields";
+import { GameMode } from "../../const";
+import { ActionCreator, ActionType } from "../../store/action";
+import { checkCoordsOnBlock } from "../../utils/fields";
 
 const COLUMN_LETTERS = ["", "А", "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К"];
 const ROW_NUMBERS = Array(10).fill(null);
 const PLAYER_TYPE = `player`;
 
-const UserFiled = ({fieldsData, shipsData, currentShipOnPlace, updateUserField, gameMode}) => {
+const UserFiled = ({
+  fieldsData,
+  shipsData,
+  currentShipOnPlace,
+  updateDataOnMouseOut,
+  gameMode,
+  updateUserFiled,
+  placeCurrentShip,
+  shipTypeOnPlace,
+  isAllShipPlaced
+}) => {
   const lastShot = ``;
 
-  const handleBtnPress = () => { };
-  const handleMouseOver = useCallback((evtOver) => {
-    if (gameMode === GameMode.ARRAGMENT) {      
-      currentShipOnPlace.coords = [];
+  const handleBtnPress = () => {};
+  const handleMouseOver = useCallback(
+    (evtOver) => {
+      if (gameMode === GameMode.ARRAGMENT) {
+        const newCurrentShipOnPlace = { ...currentShipOnPlace };
+        newCurrentShipOnPlace.coords = [];
 
-      const columnNumber = +evtOver.target.id.slice(0, 1);
-      const rowNumber = +evtOver.target.id.slice(1);
-      const deckLength = +currentShipOnPlace.id.slice(0, 1);
+        const columnNumber = +evtOver.target.id.slice(0, 1);
+        const rowNumber = +evtOver.target.id.slice(1);
+        const deckLength = +newCurrentShipOnPlace.id.slice(0, 1);
 
-      if (currentShipOnPlace.isVertical) {
-        for (let i = 0; i < deckLength; i++) {
-          if (deckLength <= 10 - rowNumber) {
-            currentShipOnPlace.coords.push(columnNumber.toString() + (rowNumber + i));
-          } else {
-            currentShipOnPlace.coords.push(columnNumber.toString() + (rowNumber - i));
+        if (newCurrentShipOnPlace.isVertical) {
+          for (let i = 0; i < deckLength; i++) {
+            if (deckLength <= 10 - rowNumber) {
+              newCurrentShipOnPlace.coords.push(
+                columnNumber.toString() + (rowNumber + i)
+              );
+            } else {
+              newCurrentShipOnPlace.coords.push(
+                columnNumber.toString() + (rowNumber - i)
+              );
+            }
+          }
+        } else {
+          for (let i = 0; i < deckLength; i++) {
+            if (deckLength <= 10 - columnNumber) {
+              newCurrentShipOnPlace.coords.push(
+                (columnNumber + i).toString() + rowNumber
+              );
+            } else {
+              newCurrentShipOnPlace.coords.push(
+                (columnNumber - i).toString() + rowNumber
+              );
+            }
           }
         }
-      } else {
-        for (let i = 0; i < deckLength; i++) {
-          if (deckLength <= 10 - columnNumber) {
-            currentShipOnPlace.coords.push((columnNumber + i).toString() + rowNumber);
-          } else {
-            currentShipOnPlace.coords.push((columnNumber - i).toString() + rowNumber);
-          }
+
+        const isCoordsBloked = checkCoordsOnBlock(
+          newCurrentShipOnPlace.coords,
+          fieldsData
+        );
+
+        if (!isCoordsBloked) {
+          const newFieldsData = { ...fieldsData };
+          newCurrentShipOnPlace.coords.forEach((coord) => {
+            newFieldsData["column" + coord.slice(0, 1)][
+              coord.slice(1)
+            ].isShip = true;
+          });
+          updateDataOnMouseOut(newCurrentShipOnPlace, newFieldsData);
         }
       }
+    },
+    [currentShipOnPlace, fieldsData, gameMode, updateDataOnMouseOut]
+  );
 
-      const isCoordsBloked = checkCoordsOnBlock(currentShipOnPlace.coords, fieldsData);
-      if (!isCoordsBloked) {
-        currentShipOnPlace.coords.forEach((coord) => {
-          fieldsData["column" + coord.slice(0, 1)][coord.slice(1)].isShip = true;
-        });
-        
-        updateUserField(fieldsData);
+  const handleMouseOut = useCallback(
+    (evtOut) => {
+      if (
+        gameMode === GameMode.ARRAGMENT &&
+        currentShipOnPlace &&
+        !evtOut.target.classList.contains(".ship")
+      ) {
+        const newCurrentShipOnPlace = { ...currentShipOnPlace };
+        const newFieldsData = fieldsData;
+
+        if (!checkCoordsOnBlock(newCurrentShipOnPlace.coords, newFieldsData)) {
+          newCurrentShipOnPlace.coords.forEach((coord) => {
+            newFieldsData["column" + coord.slice(0, 1)][
+              coord.slice(1)
+            ].isShip = false;
+            newFieldsData["column" + coord.slice(0, 1)][
+              coord.slice(1)
+            ].isBlocked = false;
+          });
+          updateUserFiled(newFieldsData);
+        }
       }
+    },
+    [currentShipOnPlace, gameMode, fieldsData, updateDataOnMouseOut]
+  );
+
+  const handleBattlefieldClick = useCallback((evt) => {
+    if (
+      gameMode === GameMode.ARRAGMENT &&
+      !evt.target.classList.contains(".ship") &&
+      !isAllShipPlaced &&
+      !checkCoordsOnBlock(currentShipOnPlace.coords, fieldsData)
+    ) {
+      const shipType = "deck" + currentShipOnPlace.id.slice(0, 1);
+      const shipNumber = +currentShipOnPlace.id.slice(-1);
+
+      const newCurrentShipOnPlace = { ...currentShipOnPlace };
+      newCurrentShipOnPlace.isPlaced = true;
+      const currentShipsData = { ...shipsData };
+      currentShipsData[shipType][shipNumber] = newCurrentShipOnPlace;
+
+      const newFieldsData = { ...fieldsData };
+      newCurrentShipOnPlace.coords.forEach((coord) => {
+        newFieldsData["column" + coord.slice(0, 1)][
+          coord.slice(1)
+        ].isShip = true;
+        newFieldsData["column" + coord.slice(0, 1)][
+          coord.slice(1)
+        ].isBlocked = true;
+        newFieldsData["column" + coord.slice(0, 1)][coord.slice(1)].shipID =
+          newCurrentShipOnPlace.id;
+
+        if (+coord.slice(0, 1) > 0) {
+          newFieldsData["column" + (+coord.slice(0, 1) - 1)][
+            coord.slice(1)
+          ].isBlocked = true;
+        }
+        if (+coord.slice(0, 1) < 9) {
+          newFieldsData["column" + (+coord.slice(0, 1) + 1)][
+            +coord.slice(1)
+          ].isBlocked = true;
+        }
+        if (+coord.slice(1) > 0) {
+          newFieldsData["column" + coord.slice(0, 1)][
+            +coord.slice(1) - 1
+          ].isBlocked = true;
+        }
+        if (+coord.slice(1) < 9) {
+          newFieldsData["column" + coord.slice(0, 1)][
+            +coord.slice(1) + 1
+          ].isBlocked = true;
+        }
+
+        if (+coord.slice(0, 1) < 9 && +coord.slice(1) < 9) {
+          newFieldsData["column" + (+coord.slice(0, 1) + 1)][
+            +coord.slice(1) + 1
+          ].isBlocked = true;
+        }
+        if (+coord.slice(0, 1) > 0 && +coord.slice(1) > 0) {
+          newFieldsData["column" + (+coord.slice(0, 1) - 1)][
+            +coord.slice(1) - 1
+          ].isBlocked = true;
+        }
+        if (+coord.slice(0, 1) < 9 && +coord.slice(1) > 0) {
+          newFieldsData["column" + (+coord.slice(0, 1) + 1)][
+            +coord.slice(1) - 1
+          ].isBlocked = true;
+        }
+        if (+coord.slice(0, 1) > 0 && +coord.slice(1) < 9) {
+          newFieldsData["column" + (+coord.slice(0, 1) - 1)][
+            +coord.slice(1) + 1
+          ].isBlocked = true;
+        }
+      });
+
+      const isShipsTypePlaced = !shipsData["deck" + shipTypeOnPlace].find(
+        (ship) => ship.isPlaced === false
+      );
+
+      const nextShipTypeOnPlace = isShipsTypePlaced
+        ? shipTypeOnPlace - 1
+        : shipTypeOnPlace;
+      const nextShipOnPlaced = nextShipTypeOnPlace
+        ? shipsData["deck" + nextShipTypeOnPlace].find(
+            (shipData) => !shipData.isPlaced
+          )
+        : nextShipTypeOnPlace;
+
+      placeCurrentShip({
+        shipTypeOnPlace: nextShipTypeOnPlace,
+        currentShipOnPlace: nextShipOnPlaced,
+        fieldsData: newFieldsData,
+        shipsData: currentShipsData,
+      });      
     }
-  }, [currentShipOnPlace, fieldsData, gameMode, updateUserField]);
-  const handleMouseOut = () => {};
-  const handleRotate = () => {};
-  const handleBattlefieldClick = () => {};
+  }, [placeCurrentShip, shipTypeOnPlace, currentShipOnPlace, fieldsData, shipsData]);
+
+  const handleRotate = useCallback(
+    (evt) => {
+      if (gameMode === GameMode.ARRAGMENT) {
+        const newCurrentShipOnPlace = { ...currentShipOnPlace };
+        const newFieldsData = { ...fieldsData };
+
+        newCurrentShipOnPlace.isVertical = !newCurrentShipOnPlace.isVertical;
+
+        if (!checkCoordsOnBlock(newCurrentShipOnPlace.coords, newFieldsData)) {
+          newCurrentShipOnPlace.coords.forEach((coord) => {
+            newFieldsData["column" + coord.slice(0, 1)][
+              coord.slice(1)
+            ].isShip = false;
+            newFieldsData["column" + coord.slice(0, 1)][
+              coord.slice(1)
+            ].isBlocked = false;
+          });
+
+          newCurrentShipOnPlace.coords = [];
+          const columnNumber = +evt.target.id.slice(0, 1);
+          const rowNumber = +evt.target.id.slice(1);
+          const deckLength = +newCurrentShipOnPlace.id.slice(0, 1);
+
+          if (newCurrentShipOnPlace.isVertical) {
+            for (let i = 0; i < deckLength; i++) {
+              if (deckLength <= 10 - rowNumber) {
+                newCurrentShipOnPlace.coords.push(
+                  columnNumber.toString() + (rowNumber + i)
+                );
+              } else {
+                newCurrentShipOnPlace.coords.push(
+                  columnNumber.toString() + (rowNumber - i)
+                );
+              }
+            }
+          } else {
+            for (let i = 0; i < deckLength; i++) {
+              if (deckLength <= 10 - columnNumber) {
+                newCurrentShipOnPlace.coords.push(
+                  (columnNumber + i).toString() + rowNumber
+                );
+              } else {
+                newCurrentShipOnPlace.coords.push(
+                  (columnNumber - i).toString() + rowNumber
+                );
+              }
+            }
+          }
+
+          const isCoordsBloked = checkCoordsOnBlock(
+            newCurrentShipOnPlace.coords,
+            newFieldsData
+          );
+
+          if (!isCoordsBloked) {
+            newCurrentShipOnPlace.coords.forEach((coord) => {
+              newFieldsData["column" + coord.slice(0, 1)][
+                coord.slice(1)
+              ].isShip = true;
+            });
+          }
+        }
+        updateDataOnMouseOut(newCurrentShipOnPlace, newFieldsData);
+      }
+    },
+    [gameMode, currentShipOnPlace, fieldsData, updateDataOnMouseOut]
+  );
+
   return (
     <div className="game-board current-board">
-      <div className="game" >
+      <div className="game">
         <ul className="game__column-name">
-          {
-            COLUMN_LETTERS.map((letter, i) => <li key={i} className={"square"}>{letter}</li>)
-          }
+          {COLUMN_LETTERS.map((letter, i) => (
+            <li key={i} className={"square"}>
+              {letter}
+            </li>
+          ))}
         </ul>
         <ul className="game__row-name">
-          {
-            ROW_NUMBERS.map((item, i) => <li key={i} className={"square"}>{i + 1}</li>)
-          }
+          {ROW_NUMBERS.map((item, i) => (
+            <li key={i} className={"square"}>
+              {i + 1}
+            </li>
+          ))}
         </ul>
         <Battlefield
-          playerType={PLAYER_TYPE}        
-          
+          playerType={PLAYER_TYPE}
           lastShot={lastShot}
-
           handleBtnPress={handleBtnPress}
           onMouseOverHandler={handleMouseOver}
-          handleMouseOut={handleMouseOut}
-          handleWheelRotate={handleRotate}
-          handleBattlefieldClick={handleBattlefieldClick}
+          onMouseOutHandler={handleMouseOut}
+          onWheelRotateHandler={handleRotate}
+          onBattlefieldClickHandler={handleBattlefieldClick}
         />
       </div>
     </div>
@@ -86,22 +299,37 @@ const UserFiled = ({fieldsData, shipsData, currentShipOnPlace, updateUserField, 
 UserFiled.propTypes = {
   fieldsData: PropTypes.object.isRequired,
   shipsData: PropTypes.object.isRequired,
-  updateUserField: PropTypes.func.isRequired,
   currentShipOnPlace: PropTypes.object.isRequired,
-  gameMode: PropTypes.string.isRequired
+  gameMode: PropTypes.string.isRequired,
+  updateDataOnMouseOut: PropTypes.func.isRequired,
+  updateUserFiled: PropTypes.func.isRequired,
+  shipTypeOnPlace: PropTypes.number.isRequired,
+  placeCurrentShip: PropTypes.func.isRequired,
+  isAllShipPlaced: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = (state) => ({
   fieldsData: state[NameSpace.PLAYER_FIELD].playerField,
   shipsData: state[NameSpace.PLAYER_SHIPS].playerShips,
   currentShipOnPlace: state[NameSpace.PLAYER_SHIPS].currentShipOnPlace,
-  gameMode: state[NameSpace.GAME_MODE].gameMode
+  gameMode: state[NameSpace.GAME_MODE].gameMode,
+  shipTypeOnPlace: state[NameSpace.PLAYER_SHIPS].shipTypeOnPlace,
+  isAllShipPlaced: state[NameSpace.PLAYER_SHIPS].isAllShipPlaced
 });
 
 const mapDispatchToProps = (dispath) => ({
-  updateUserField(newField) {
-    dispath(ActionCreator.updateUserField(newField))
-  }
+  updateDataOnMouseOut(newCurrentShip, newFields) {
+    dispath(ActionCreator.updateShipOnPlace(newCurrentShip));
+    dispath(ActionCreator.updateUserField(newFields));
+  },
+  updateUserFiled(newFields) {
+    dispath(ActionCreator.updateUserField(newFields));
+  },
+  placeCurrentShip(nextShipData) {
+    dispath(ActionCreator.placeShip({shipTypeOnPlace: nextShipData.shipTypeOnPlace, shipsData: nextShipData.shipsData}));
+    dispath(ActionCreator.updateUserField(nextShipData.fieldsData));
+    dispath(ActionCreator.updateShipOnPlace(nextShipData.currentShipOnPlace));
+  },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserFiled);

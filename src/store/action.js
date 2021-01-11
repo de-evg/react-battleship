@@ -6,7 +6,9 @@ export const ActionType = {
   RESET_OPPONENT_FIELD: `RESET_OPPONENT_FIELD`,
   RESET_GAME_MODE: `RESET_GAME_MODE`,
   UPDATE_USER_FIELD: `UPDATE_USER_FIELD`,
-  UPDATE_SHIP_ON_PLACE: `UPDATE_SHIP_ON_PLACE`
+  UPDATE_SHIP_ON_PLACE: `UPDATE_SHIP_ON_PLACE`,
+  ALL_SHIPS_PLACED: `ALL_SHIPS_PLACED`,
+  SHIP_PLACED: `SHIP_PLACED`
 };
 
 export const ActionCreator = {
@@ -37,4 +39,11 @@ export const ActionCreator = {
     type: `UPDATE_SHIP_ON_PLACE`,
     payload: newShip
   }),
+  updateAllShipPlaced: () => ({
+    type: `ALL_SHIPS_PLACED`    
+  }),
+  placeShip:  (nextShipData) => ({
+    type: `SHIP_PLACED`,
+    payload: nextShipData
+  })
 };

@@ -11,6 +11,10 @@
 # production
 /build
 
+# Вспомогательные файлы
+*.log*
+node_modules/
+
 # misc
 .DS_Store
 .env.local

@@ -25,6 +25,8 @@ const OpponentField = ({fieldsData}) => {
           playerType={``}
           isPlayerMove={``}
           onMouseOverHandler={() => {}}
+          onMouseOutHandler={() => {}}
+          onWheelRotateHandler={() => {}}
           handlePlayerMove={() => {}}
           handleMoveClick={() => {}}
         />
