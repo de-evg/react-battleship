@@ -10,3 +10,9 @@ export const GameMode = {
     ARRAGMENT: `ARRAGMENT`,
     GAME: `GAME`
 };
+
+export const ShotStatus = {
+    HIT: `HIT`,
+    DESTROY: `DESTROY`,
+    MISS: `MISS`
+};

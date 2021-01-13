@@ -10,18 +10,36 @@ export const generateBasicGameFieldData = () => {
         isMiss: false,
         isBlocked: false,
         isHit: false,
-        isDestroyed: false
+        isDestroyed: false,
       };
     }
   }
   return basicGameFieldData;
-}
+};
 
 export const checkCoordsOnBlock = (coords, fields) => {
   const isFieldBlocked = coords.find((coordinate) => {
     const [columnNumber, rowNumber] = coordinate.split(``);
     const fieldOnCheck = fields["column" + columnNumber][rowNumber];
-      return fieldOnCheck.isBlocked ? true : false;
+    return fieldOnCheck.isBlocked ? true : false;
   });
   return !!isFieldBlocked;
+};
+
+export const placeComputerShips = (fieldsData, shipsData) => {
+  const newFieldsData = {...fieldsData};
+  Object.keys(shipsData).forEach((shipType) =>
+    shipsData[shipType].forEach((ship) => {
+      ship.coords.map((coord) => {
+        newFieldsData["column" + coord.slice(0, 1)][coord.slice(1)].isShip = true;
+        newFieldsData["column" + coord.slice(0, 1)][
+          coord.slice(1)
+        ].isBlocked = true;
+        newFieldsData["column" + coord.slice(0, 1)][coord.slice(1)].shipID =
+          ship.id;
+        return coord;
+      });
+    })
+  );
+  return newFieldsData;
 };

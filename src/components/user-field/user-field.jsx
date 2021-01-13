@@ -12,22 +12,22 @@ const ROW_NUMBERS = Array(10).fill(null);
 const PLAYER_TYPE = `player`;
 
 const UserFiled = ({
-  fieldsData,
-  shipsData,
+  playerField,
+  playerShipsData,
   currentShipOnPlace,
   updateDataOnMouseOut,
   gameMode,
   updateUserFiled,
   placeCurrentShip,
   shipTypeOnPlace,
-  isAllShipPlaced
+  isAllShipPlaced,
 }) => {
   const lastShot = ``;
 
   const handleBtnPress = () => {};
   const handleMouseOver = useCallback(
     (evtOver) => {
-      if (gameMode === GameMode.ARRAGMENT) {
+      if (gameMode === GameMode.ARRAGMENT && !isAllShipPlaced) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
         newCurrentShipOnPlace.coords = [];
 
@@ -63,11 +63,11 @@ const UserFiled = ({
 
         const isCoordsBloked = checkCoordsOnBlock(
           newCurrentShipOnPlace.coords,
-          fieldsData
+          playerField
         );
 
         if (!isCoordsBloked) {
-          const newFieldsData = { ...fieldsData };
+          const newFieldsData = { ...playerField };
           newCurrentShipOnPlace.coords.forEach((coord) => {
             newFieldsData["column" + coord.slice(0, 1)][
               coord.slice(1)
@@ -77,7 +77,7 @@ const UserFiled = ({
         }
       }
     },
-    [currentShipOnPlace, fieldsData, gameMode, updateDataOnMouseOut]
+    [isAllShipPlaced, currentShipOnPlace, playerField, gameMode, updateDataOnMouseOut]
   );
 
   const handleMouseOut = useCallback(
@@ -85,10 +85,11 @@ const UserFiled = ({
       if (
         gameMode === GameMode.ARRAGMENT &&
         currentShipOnPlace &&
+        !isAllShipPlaced &&
         !evtOut.target.classList.contains(".ship")
       ) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
-        const newFieldsData = fieldsData;
+        const newFieldsData = {...playerField};
 
         if (!checkCoordsOnBlock(newCurrentShipOnPlace.coords, newFieldsData)) {
           newCurrentShipOnPlace.coords.forEach((coord) => {
@@ -103,105 +104,119 @@ const UserFiled = ({
         }
       }
     },
-    [currentShipOnPlace, gameMode, fieldsData, updateDataOnMouseOut]
+    [isAllShipPlaced, currentShipOnPlace, gameMode, playerField, updateUserFiled]
   );
 
-  const handleBattlefieldClick = useCallback((evt) => {
-    if (
-      gameMode === GameMode.ARRAGMENT &&
-      !evt.target.classList.contains(".ship") &&
-      !isAllShipPlaced &&
-      !checkCoordsOnBlock(currentShipOnPlace.coords, fieldsData)
-    ) {
-      const shipType = "deck" + currentShipOnPlace.id.slice(0, 1);
-      const shipNumber = +currentShipOnPlace.id.slice(-1);
+  const handleBattlefieldClick = useCallback(
+    (evt) => {
+      if (
+        gameMode === GameMode.ARRAGMENT &&
+        !evt.target.classList.contains(".ship") &&
+        !isAllShipPlaced &&
+        !checkCoordsOnBlock(currentShipOnPlace.coords, playerField)
+      ) {
+        const shipType = "deck" + currentShipOnPlace.id.slice(0, 1);
+        const shipNumber = +currentShipOnPlace.id.slice(-1);
 
-      const newCurrentShipOnPlace = { ...currentShipOnPlace };
-      newCurrentShipOnPlace.isPlaced = true;
-      const currentShipsData = { ...shipsData };
-      currentShipsData[shipType][shipNumber] = newCurrentShipOnPlace;
+        const newCurrentShipOnPlace = { ...currentShipOnPlace };
+        newCurrentShipOnPlace.isPlaced = true;
+        const currentShipsData = { ...playerShipsData };
+        currentShipsData[shipType][shipNumber] = newCurrentShipOnPlace;
 
-      const newFieldsData = { ...fieldsData };
-      newCurrentShipOnPlace.coords.forEach((coord) => {
-        newFieldsData["column" + coord.slice(0, 1)][
-          coord.slice(1)
-        ].isShip = true;
-        newFieldsData["column" + coord.slice(0, 1)][
-          coord.slice(1)
-        ].isBlocked = true;
-        newFieldsData["column" + coord.slice(0, 1)][coord.slice(1)].shipID =
-          newCurrentShipOnPlace.id;
-
-        if (+coord.slice(0, 1) > 0) {
-          newFieldsData["column" + (+coord.slice(0, 1) - 1)][
+        const newFieldsData = { ...playerField };
+        newCurrentShipOnPlace.coords.forEach((coord) => {
+          newFieldsData["column" + coord.slice(0, 1)][
+            coord.slice(1)
+          ].isShip = true;
+          newFieldsData["column" + coord.slice(0, 1)][
             coord.slice(1)
           ].isBlocked = true;
-        }
-        if (+coord.slice(0, 1) < 9) {
-          newFieldsData["column" + (+coord.slice(0, 1) + 1)][
-            +coord.slice(1)
-          ].isBlocked = true;
-        }
-        if (+coord.slice(1) > 0) {
-          newFieldsData["column" + coord.slice(0, 1)][
-            +coord.slice(1) - 1
-          ].isBlocked = true;
-        }
-        if (+coord.slice(1) < 9) {
-          newFieldsData["column" + coord.slice(0, 1)][
-            +coord.slice(1) + 1
-          ].isBlocked = true;
-        }
+          newFieldsData["column" + coord.slice(0, 1)][coord.slice(1)].shipID =
+            newCurrentShipOnPlace.id;
 
-        if (+coord.slice(0, 1) < 9 && +coord.slice(1) < 9) {
-          newFieldsData["column" + (+coord.slice(0, 1) + 1)][
-            +coord.slice(1) + 1
-          ].isBlocked = true;
-        }
-        if (+coord.slice(0, 1) > 0 && +coord.slice(1) > 0) {
-          newFieldsData["column" + (+coord.slice(0, 1) - 1)][
-            +coord.slice(1) - 1
-          ].isBlocked = true;
-        }
-        if (+coord.slice(0, 1) < 9 && +coord.slice(1) > 0) {
-          newFieldsData["column" + (+coord.slice(0, 1) + 1)][
-            +coord.slice(1) - 1
-          ].isBlocked = true;
-        }
-        if (+coord.slice(0, 1) > 0 && +coord.slice(1) < 9) {
-          newFieldsData["column" + (+coord.slice(0, 1) - 1)][
-            +coord.slice(1) + 1
-          ].isBlocked = true;
-        }
-      });
+          if (+coord.slice(0, 1) > 0) {
+            newFieldsData["column" + (+coord.slice(0, 1) - 1)][
+              coord.slice(1)
+            ].isBlocked = true;
+          }
+          if (+coord.slice(0, 1) < 9) {
+            newFieldsData["column" + (+coord.slice(0, 1) + 1)][
+              +coord.slice(1)
+            ].isBlocked = true;
+          }
+          if (+coord.slice(1) > 0) {
+            newFieldsData["column" + coord.slice(0, 1)][
+              +coord.slice(1) - 1
+            ].isBlocked = true;
+          }
+          if (+coord.slice(1) < 9) {
+            newFieldsData["column" + coord.slice(0, 1)][
+              +coord.slice(1) + 1
+            ].isBlocked = true;
+          }
 
-      const isShipsTypePlaced = !shipsData["deck" + shipTypeOnPlace].find(
-        (ship) => ship.isPlaced === false
-      );
+          if (+coord.slice(0, 1) < 9 && +coord.slice(1) < 9) {
+            newFieldsData["column" + (+coord.slice(0, 1) + 1)][
+              +coord.slice(1) + 1
+            ].isBlocked = true;
+          }
+          if (+coord.slice(0, 1) > 0 && +coord.slice(1) > 0) {
+            newFieldsData["column" + (+coord.slice(0, 1) - 1)][
+              +coord.slice(1) - 1
+            ].isBlocked = true;
+          }
+          if (+coord.slice(0, 1) < 9 && +coord.slice(1) > 0) {
+            newFieldsData["column" + (+coord.slice(0, 1) + 1)][
+              +coord.slice(1) - 1
+            ].isBlocked = true;
+          }
+          if (+coord.slice(0, 1) > 0 && +coord.slice(1) < 9) {
+            newFieldsData["column" + (+coord.slice(0, 1) - 1)][
+              +coord.slice(1) + 1
+            ].isBlocked = true;
+          }
+        });
 
-      const nextShipTypeOnPlace = isShipsTypePlaced
-        ? shipTypeOnPlace - 1
-        : shipTypeOnPlace;
-      const nextShipOnPlaced = nextShipTypeOnPlace
-        ? shipsData["deck" + nextShipTypeOnPlace].find(
-            (shipData) => !shipData.isPlaced
-          )
-        : nextShipTypeOnPlace;
+        const isShipsTypePlaced = !playerShipsData["deck" + shipTypeOnPlace].find(
+          (ship) => ship.isPlaced === false
+        );
 
-      placeCurrentShip({
-        shipTypeOnPlace: nextShipTypeOnPlace,
-        currentShipOnPlace: nextShipOnPlaced,
-        fieldsData: newFieldsData,
-        shipsData: currentShipsData,
-      });      
-    }
-  }, [placeCurrentShip, shipTypeOnPlace, currentShipOnPlace, fieldsData, shipsData]);
+        const nextShipTypeOnPlace = isShipsTypePlaced
+          ? shipTypeOnPlace - 1
+          : shipTypeOnPlace;
+        const nextShipOnPlaced = nextShipTypeOnPlace
+          ? playerShipsData["deck" + nextShipTypeOnPlace].find(
+              (shipData) => !shipData.isPlaced
+            )
+          : nextShipTypeOnPlace;
+
+        const isArrigementOver = !nextShipTypeOnPlace;
+
+        placeCurrentShip({
+          shipTypeOnPlace: nextShipTypeOnPlace,
+          currentShipOnPlace: nextShipOnPlaced,
+          playerField: newFieldsData,
+          playerShipsData: currentShipsData,
+          isAllShipPlaced: isArrigementOver,
+        });
+      }
+    },
+    [
+      gameMode,
+      isAllShipPlaced,
+      placeCurrentShip,
+      shipTypeOnPlace,
+      currentShipOnPlace,
+      playerField,
+      playerShipsData,
+    ]
+  );
 
   const handleRotate = useCallback(
     (evt) => {
       if (gameMode === GameMode.ARRAGMENT) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
-        const newFieldsData = { ...fieldsData };
+        const newFieldsData = { ...playerField };
 
         newCurrentShipOnPlace.isVertical = !newCurrentShipOnPlace.isVertical;
 
@@ -262,7 +277,7 @@ const UserFiled = ({
         updateDataOnMouseOut(newCurrentShipOnPlace, newFieldsData);
       }
     },
-    [gameMode, currentShipOnPlace, fieldsData, updateDataOnMouseOut]
+    [gameMode, currentShipOnPlace, playerField, updateDataOnMouseOut]
   );
 
   return (
@@ -284,6 +299,7 @@ const UserFiled = ({
         </ul>
         <Battlefield
           playerType={PLAYER_TYPE}
+          fieldsData={playerField}
           lastShot={lastShot}
           handleBtnPress={handleBtnPress}
           onMouseOverHandler={handleMouseOver}
@@ -297,24 +313,24 @@ const UserFiled = ({
 };
 
 UserFiled.propTypes = {
-  fieldsData: PropTypes.object.isRequired,
-  shipsData: PropTypes.object.isRequired,
+  playerField: PropTypes.object.isRequired,
+  playerShipsData: PropTypes.object.isRequired,
   currentShipOnPlace: PropTypes.object.isRequired,
   gameMode: PropTypes.string.isRequired,
   updateDataOnMouseOut: PropTypes.func.isRequired,
   updateUserFiled: PropTypes.func.isRequired,
   shipTypeOnPlace: PropTypes.number.isRequired,
   placeCurrentShip: PropTypes.func.isRequired,
-  isAllShipPlaced: PropTypes.bool.isRequired
+  isAllShipPlaced: PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-  fieldsData: state[NameSpace.PLAYER_FIELD].playerField,
-  shipsData: state[NameSpace.PLAYER_SHIPS].playerShips,
+  playerShipsData: state[NameSpace.PLAYER_SHIPS].playerShipsData,
+  playerField: state[NameSpace.PLAYER_FIELD].playerField,
   currentShipOnPlace: state[NameSpace.PLAYER_SHIPS].currentShipOnPlace,
   gameMode: state[NameSpace.GAME_MODE].gameMode,
   shipTypeOnPlace: state[NameSpace.PLAYER_SHIPS].shipTypeOnPlace,
-  isAllShipPlaced: state[NameSpace.PLAYER_SHIPS].isAllShipPlaced
+  isAllShipPlaced: state[NameSpace.PLAYER_SHIPS].isAllShipPlaced,
 });
 
 const mapDispatchToProps = (dispath) => ({
@@ -326,8 +342,14 @@ const mapDispatchToProps = (dispath) => ({
     dispath(ActionCreator.updateUserField(newFields));
   },
   placeCurrentShip(nextShipData) {
-    dispath(ActionCreator.placeShip({shipTypeOnPlace: nextShipData.shipTypeOnPlace, shipsData: nextShipData.shipsData}));
-    dispath(ActionCreator.updateUserField(nextShipData.fieldsData));
+    dispath(
+      ActionCreator.placeShip({
+        shipTypeOnPlace: nextShipData.shipTypeOnPlace,
+        playerShipsData: nextShipData.playerShipsData,
+        isAllShipPlaced: nextShipData.isAllShipPlaced,
+      })
+    );
+    dispath(ActionCreator.updateUserField(nextShipData.playerField));
     dispath(ActionCreator.updateShipOnPlace(nextShipData.currentShipOnPlace));
   },
 });

@@ -1,8 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import BattlefieldRow from "../battlefield-row/battlefield-row";
-import { connect } from "react-redux";
-import { NameSpace } from "../../store/reducers/root";
 
 const Battlefied = ({ fieldsData, onMouseOverHandler, onMouseOutHandler, onWheelRotateHandler, onBattlefieldClickHandler }) => {
   return (
@@ -17,7 +15,7 @@ const Battlefied = ({ fieldsData, onMouseOverHandler, onMouseOutHandler, onWheel
         <BattlefieldRow
           key={i}
           columnData={fieldsData[columnName]}
-          playerType={`player`}
+          playerType={``}
           gameMode={``}
         />
       ))}
@@ -33,8 +31,4 @@ Battlefied.propTypes = {
   onBattlefieldClickHandler: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state) => ({
-  fieldsData: state[NameSpace.PLAYER_FIELD].playerField,
-});
-
-export default connect(mapStateToProps)(Battlefied);
+export default Battlefied;

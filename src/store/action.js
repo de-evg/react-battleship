@@ -8,7 +8,14 @@ export const ActionType = {
   UPDATE_USER_FIELD: `UPDATE_USER_FIELD`,
   UPDATE_SHIP_ON_PLACE: `UPDATE_SHIP_ON_PLACE`,
   ALL_SHIPS_PLACED: `ALL_SHIPS_PLACED`,
-  SHIP_PLACED: `SHIP_PLACED`
+  SHIP_PLACED: `SHIP_PLACED`,
+  GENERATE_RANDOM_SHIPS: `GENERATE_RANDOM_SHIPS`,
+  PLACE_COMPUTER_SHIPS: `PLACE_COMPUTER_SHIPS`,
+  OPPONENT_SHIP_PLACED: `OPPONENT_SHIP_PLACED`,
+  UPDATE_USER_SHIPS: `UPDATE_USER_SHIPS`,
+  UPDATE_SINGLEPLAYER_GAME: `UPDATE_SINGLEPLAYER_GAME`,
+  UPDATE_OPPONENT_SHIPS: `UPDATE_OPPONENT_SHIPS`,
+  UPDATE_OPPONENT_FIELD: `UPDATE_OPPONENT_FIELD`
 };
 
 export const ActionCreator = {
@@ -31,9 +38,21 @@ export const ActionCreator = {
   resetGameMode: () => ({
     type: `RESET_GAME_MODE`
   }),
+  updateOpponentShips: (newShipsData) => ({
+    type: `UPDATE_OPPONENT_SHIPS`,
+    payload: newShipsData
+  }),
+  updateOpponentField: (newField) => ({
+    type: `UPDATE_OPPONENT_FIELD`,
+    payload: newField
+  }),
   updateUserField: (newField) => ({
     type: `UPDATE_USER_FIELD`,
     payload: newField
+  }),
+  updateUserShips: (updatedShipsData) => ({
+    type: `UPDATE_USER_SHIPS`,
+    payload: updatedShipsData
   }),
   updateShipOnPlace: (newShip) => ({
     type: `UPDATE_SHIP_ON_PLACE`,
@@ -45,5 +64,19 @@ export const ActionCreator = {
   placeShip:  (nextShipData) => ({
     type: `SHIP_PLACED`,
     payload: nextShipData
+  }),
+  generateComputerShips: () => ({
+    type: `GENERATE_RANDOM_SHIPS`,
+  }),
+  placeComputerShips: (opponentData) => ({
+    type: `PLACE_COMPUTER_SHIPS`,
+    payload: opponentData
+  }),
+  opponentShipPlaced: () => ({
+    type: `OPPONENT_SHIP_PLACED`
+  }),
+  updateSingleplayerGame: (newGameData) => ({
+    type: `UPDATE_SINGLEPLAYER_GAME`,
+    payload: newGameData
   })
 };

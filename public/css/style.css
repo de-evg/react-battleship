@@ -190,9 +190,9 @@ ul {
 .battlefield .hit::before {
   position: absolute;
   content: "";
-  top: 12px;
-  left: -3px;
-  width: 35px;
+  top: 18px;
+  left: -7px;
+  width: 53px;
   height: 2px;
   transform: rotate(45deg);
   background-color: rgba(61, 12, 12, 0.5);
@@ -201,9 +201,9 @@ ul {
 .battlefield .hit::after {
   position: absolute;
   content: "";
-  top: 12px;
-  left: -3px;
-  width: 35px;
+  top: 18px;
+  left: -7px;
+  width: 53px;
   height: 2px;
   transform: rotate(-45deg);
   background-color: rgba(61, 12, 12, 0.5);
@@ -552,27 +552,7 @@ ul {
   font-weight: 400;
 }
 
-.battlefield .hit::before {
-  position: absolute;
-  content: "";
-  top: 27px;
-  left: -9px;
-  width: 78px;
-  height: 2px;
-  transform: rotate(45deg);
-  background-color: rgba(61, 12, 12, 0.5);
-}
 
-.battlefield .hit::after {
-  position: absolute;
-  content: "";
-  top: 27px;
-  left: -9px;
-  width: 78px;
-  height: 2px;
-  transform: rotate(-45deg);
-  background-color: rgba(61, 12, 12, 0.5);
-}
 
 .message-container {
   width: 400px;

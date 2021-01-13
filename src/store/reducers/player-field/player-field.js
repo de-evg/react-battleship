@@ -6,10 +6,10 @@ const initialState = {
   playerField: generateBasicGameFieldData()
 }
 
-export const playerField = (state = initialState, action) => {
+export const playerField = (state = {...initialState}, action) => {
   switch (action.type) {
     case ActionType.RESET_USER_FIELD:
-      return {...state, ...initialState}
+      return {...state, playerField: generateBasicGameFieldData()}
 
     case ActionType.UPDATE_USER_FIELD:
       return {...state, playerField: action.payload}
