@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
@@ -25,25 +25,34 @@ const SingleplayerScreen = ({
   opponentShipsData,
   opponentField
 }) => {
-  const { isPlayerMove } = singleplayerGame;
-  useEffect(() => {
-    let shotTimer;
-    
+  const { isPlayerMove, isReplayMove } = singleplayerGame;
+  const [isCompMove, setCompMove] = useState(true);
+
+  useEffect(() => {    
     if (gameMode === GameMode.IN_MENU) {
       updateGameMode(GameMode.SINGLE_ON_START);
     }
     if (gameMode === GameMode.ARRAGMENT && isAllShipPlaced) {
       updateGameMode(GameMode.SINGLE_SHIPS_READY);
     }
-    if (gameMode === GameMode.GAME && !isPlayerMove) {
+    let delay;
+    if (gameMode === GameMode.GAME && (!isPlayerMove || isReplayMove)) {
+      delay = setTimeout(() => setCompMove(true), 700);      
+    }
+
+    if (gameMode === GameMode.GAME && !isPlayerMove && isCompMove) {      
       const computerMove = generateComputerMove(
         playerField,
         playerShipsData,
         singleplayerGame
-      );
-      setTimeout(() => makeAComputerMove(computerMove), 700);      
-    }  
+      );      
+        setCompMove(false);      
+      makeAComputerMove(computerMove);      
+    }
+    return () => clearTimeout(delay);
   }, [
+    setCompMove,
+    isReplayMove,
     gameMode,
     updateGameMode,
     isAllShipPlaced,
@@ -51,7 +60,8 @@ const SingleplayerScreen = ({
     playerShipsData,
     singleplayerGame,
     makeAComputerMove,
-    isPlayerMove
+    isPlayerMove,
+    isCompMove
   ]);
 
   const handlePlaceShipBtnClick = useCallback(() => {
