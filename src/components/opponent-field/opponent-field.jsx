@@ -8,6 +8,8 @@ import {ActionCreator} from "../../store/action";
 
 const COLUMN_LETTERS = ["", "А", "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К"];
 const ROW_NUMBERS = Array(10).fill(null);
+const IS_PLAYER_FIELD = false;
+
 
 const OpponentField = ({gameMode, opponentField, opponentShipsData, generateRandomShips, placeShips, opponentShipsPlaced, onBattlefieldClickHandler}) => {
   useEffect(() => {
@@ -38,6 +40,8 @@ const OpponentField = ({gameMode, opponentField, opponentShipsData, generateRand
           onMouseOutHandler={() => {}}
           onWheelRotateHandler={() => {}}          
           onBattlefieldClickHandler={onBattlefieldClickHandler}
+          isPlayerField={IS_PLAYER_FIELD}
+          gameMode={gameMode}
         />
       </div>
     </div>

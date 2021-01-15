@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import BattlefieldRow from "../battlefield-row/battlefield-row";
 
-const Battlefied = ({ fieldsData, onMouseOverHandler, onMouseOutHandler, onWheelRotateHandler, onBattlefieldClickHandler }) => {
+const Battlefied = ({ fieldsData, onMouseOverHandler, onMouseOutHandler, onWheelRotateHandler, onBattlefieldClickHandler, isPlayerField, gameMode }) => {
   return (
     <div
       className="game__battlefield battlefield"
@@ -15,8 +15,8 @@ const Battlefied = ({ fieldsData, onMouseOverHandler, onMouseOutHandler, onWheel
         <BattlefieldRow
           key={i}
           columnData={fieldsData[columnName]}
-          playerType={``}
-          gameMode={``}
+          isPlayerField={isPlayerField}
+          gameMode={gameMode}
         />
       ))}
     </div>
@@ -28,7 +28,9 @@ Battlefied.propTypes = {
   onMouseOverHandler: PropTypes.func.isRequired,
   onMouseOutHandler: PropTypes.func.isRequired,
   onWheelRotateHandler: PropTypes.func.isRequired,
-  onBattlefieldClickHandler: PropTypes.func.isRequired
+  onBattlefieldClickHandler: PropTypes.func.isRequired,
+  isPlayerField: PropTypes.bool.isRequired,
+  gameMode: PropTypes.string.isRequired
 };
 
 export default Battlefied;

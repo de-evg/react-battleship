@@ -9,7 +9,7 @@ import { checkCoordsOnBlock } from "../../utils/fields";
 
 const COLUMN_LETTERS = ["", "А", "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К"];
 const ROW_NUMBERS = Array(10).fill(null);
-const PLAYER_TYPE = `player`;
+const IS_PLAYER_FIELD = true;
 
 const UserFiled = ({
   playerField,
@@ -309,13 +309,14 @@ const UserFiled = ({
             </li>
           ))}
         </ul>
-        <Battlefield
-          playerType={PLAYER_TYPE}
+        <Battlefield          
           fieldsData={playerField}                    
           onMouseOverHandler={handleMouseOver}
           onMouseOutHandler={handleMouseOut}
           onWheelRotateHandler={handleRotate}
           onBattlefieldClickHandler={handleBattlefieldClick}
+          isPlayerField={IS_PLAYER_FIELD}
+          gameMode={gameMode}
         />
       </div>
     </div>
