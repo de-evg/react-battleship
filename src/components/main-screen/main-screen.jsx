@@ -11,13 +11,11 @@ const MainScreen = ({history, resetStore}) => {
 
   const handleSinglePlayerBtnClick = useCallback(() => {
     history.push(appRoute.SINGLE);
-  }, [history]);
-  const handleMultyPlayerBtnClick = () => {};
+  }, [history]);  
 
   return (
     <div className={"game__container"}>
-      <button className={"btn"} onClick={handleSinglePlayerBtnClick}>Одиночная игра</button>
-      <button className={"btn"} onClick={handleMultyPlayerBtnClick}>Сетевая игра</button>
+      <button className={"btn"} onClick={handleSinglePlayerBtnClick}>Начать игру</button>
     </div>
   );
 };

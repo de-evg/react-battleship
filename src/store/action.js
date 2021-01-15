@@ -15,7 +15,8 @@ export const ActionType = {
   UPDATE_USER_SHIPS: `UPDATE_USER_SHIPS`,
   UPDATE_SINGLEPLAYER_GAME: `UPDATE_SINGLEPLAYER_GAME`,
   UPDATE_OPPONENT_SHIPS: `UPDATE_OPPONENT_SHIPS`,
-  UPDATE_OPPONENT_FIELD: `UPDATE_OPPONENT_FIELD`
+  UPDATE_OPPONENT_FIELD: `UPDATE_OPPONENT_FIELD`,
+  SET_WINNER: `SET_WINNER`
 };
 
 export const ActionCreator = {
@@ -78,5 +79,9 @@ export const ActionCreator = {
   updateSingleplayerGame: (newGameData) => ({
     type: `UPDATE_SINGLEPLAYER_GAME`,
     payload: newGameData
+  }),
+  setWinner: (winner) => ({
+    type: `SET_WINNER`,
+    payload: winner
   })
 };

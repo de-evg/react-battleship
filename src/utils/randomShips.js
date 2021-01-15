@@ -1,6 +1,5 @@
 import { generateShipList } from "./ships.js";
 import { generateBasicGameFieldData } from "./fields.js";
-const fieldData = generateBasicGameFieldData();
 
 const generateFieldValues = () => {
   const fieldValues = [];
@@ -12,9 +11,7 @@ const generateFieldValues = () => {
   return fieldValues;
 };
 
-const fieldValues = generateFieldValues();
-
-const generateRandomShipList = (shipsData, fieldData) => {
+const generateRandomShipList = (shipsData, fieldData, fieldValues) => {
   const generateRandomOrientation = (shipsData) => {
     Object.keys(shipsData).forEach((shipType) =>
       shipsData[shipType].map((ship) => {
@@ -165,6 +162,5 @@ const generateRandomShipList = (shipsData, fieldData) => {
   generateCoords(shipsData);
   return shipsData;
 };
-const compShipList = generateRandomShipList(generateShipList(), fieldData);
 
-export { compShipList };
+export const generateCompShipList = () => generateRandomShipList(generateShipList(), generateBasicGameFieldData(), generateFieldValues());

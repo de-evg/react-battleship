@@ -18,12 +18,16 @@ export const generateBasicGameFieldData = () => {
 };
 
 export const checkCoordsOnBlock = (coords, fields) => {
-  const isFieldBlocked = coords.find((coordinate) => {
+  let coordIsBlocked = true;
+  if (!coords.length) {    
+    return coordIsBlocked;
+  }
+  coordIsBlocked = coords.find((coordinate) => {
     const [columnNumber, rowNumber] = coordinate.split(``);
     const fieldOnCheck = fields["column" + columnNumber][rowNumber];
     return fieldOnCheck.isBlocked ? true : false;
   });
-  return !!isFieldBlocked;
+  return coordIsBlocked;
 };
 
 export const placeComputerShips = (fieldsData, shipsData) => {

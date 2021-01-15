@@ -11,12 +11,11 @@ const ROW_NUMBERS = Array(10).fill(null);
 
 const OpponentField = ({gameMode, opponentField, opponentShipsData, generateRandomShips, placeShips, opponentShipsPlaced, onBattlefieldClickHandler}) => {
   useEffect(() => {
-    if (gameMode === GameMode.ARRAGMENT) {
+    if (gameMode === GameMode.ARRAGMENT && !Object.keys(opponentShipsData).length) {
       generateRandomShips();      
     }
     if (Object.keys(opponentShipsData).length && !opponentShipsPlaced) {
       placeShips(opponentField, opponentShipsData);
-
     }
   }, [gameMode, generateRandomShips, opponentField, opponentShipsData, placeShips, opponentShipsPlaced]);
 
@@ -33,10 +32,8 @@ const OpponentField = ({gameMode, opponentField, opponentShipsData, generateRand
             ROW_NUMBERS.map((item, i) => <li key={i} className={"square"}>{i + 1}</li>)
           }
         </ul>
-        <Battlefield
-          playerType={``}
+        <Battlefield          
           fieldsData={opponentField}
-          isPlayerMove={``}
           onMouseOverHandler={() => {}}
           onMouseOutHandler={() => {}}
           onWheelRotateHandler={() => {}}          

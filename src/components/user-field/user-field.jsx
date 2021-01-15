@@ -22,9 +22,6 @@ const UserFiled = ({
   shipTypeOnPlace,
   isAllShipPlaced,
 }) => {
-  const lastShot = ``;
-
-  const handleBtnPress = () => {};
   const handleMouseOver = useCallback(
     (evtOver) => {
       if (gameMode === GameMode.ARRAGMENT && !isAllShipPlaced) {
@@ -77,7 +74,13 @@ const UserFiled = ({
         }
       }
     },
-    [isAllShipPlaced, currentShipOnPlace, playerField, gameMode, updateDataOnMouseOut]
+    [
+      isAllShipPlaced,
+      currentShipOnPlace,
+      playerField,
+      gameMode,
+      updateDataOnMouseOut,
+    ]
   );
 
   const handleMouseOut = useCallback(
@@ -89,7 +92,7 @@ const UserFiled = ({
         !evtOut.target.classList.contains(".ship")
       ) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
-        const newFieldsData = {...playerField};
+        const newFieldsData = { ...playerField };
 
         if (!checkCoordsOnBlock(newCurrentShipOnPlace.coords, newFieldsData)) {
           newCurrentShipOnPlace.coords.forEach((coord) => {
@@ -100,18 +103,27 @@ const UserFiled = ({
               coord.slice(1)
             ].isBlocked = false;
           });
+          newCurrentShipOnPlace.coords = [];
           updateUserFiled(newFieldsData);
+          updateDataOnMouseOut(newCurrentShipOnPlace, newFieldsData);
         }
       }
     },
-    [isAllShipPlaced, currentShipOnPlace, gameMode, playerField, updateUserFiled]
+    [
+      isAllShipPlaced,
+      currentShipOnPlace,
+      gameMode,
+      playerField,
+      updateUserFiled,
+      updateDataOnMouseOut,
+    ]
   );
 
   const handleBattlefieldClick = useCallback(
     (evt) => {
       if (
         gameMode === GameMode.ARRAGMENT &&
-        !evt.target.classList.contains(".ship") &&
+        evt.target.tagName === "LI" &&
         !isAllShipPlaced &&
         !checkCoordsOnBlock(currentShipOnPlace.coords, playerField)
       ) {
@@ -177,9 +189,9 @@ const UserFiled = ({
           }
         });
 
-        const isShipsTypePlaced = !playerShipsData["deck" + shipTypeOnPlace].find(
-          (ship) => ship.isPlaced === false
-        );
+        const isShipsTypePlaced = !playerShipsData[
+          "deck" + shipTypeOnPlace
+        ].find((ship) => ship.isPlaced === false);
 
         const nextShipTypeOnPlace = isShipsTypePlaced
           ? shipTypeOnPlace - 1
@@ -299,9 +311,7 @@ const UserFiled = ({
         </ul>
         <Battlefield
           playerType={PLAYER_TYPE}
-          fieldsData={playerField}
-          lastShot={lastShot}
-          handleBtnPress={handleBtnPress}
+          fieldsData={playerField}                    
           onMouseOverHandler={handleMouseOver}
           onMouseOutHandler={handleMouseOut}
           onWheelRotateHandler={handleRotate}

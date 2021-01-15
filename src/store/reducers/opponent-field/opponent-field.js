@@ -13,7 +13,8 @@ const initialState = {
 export const opponentField = (state = initialState, action) => {
   switch (action.type) {
     case ActionType.RESET_OPPONENT_FIELD:
-      return { ...state, ...initialState };
+      return { ...state, opponentField: generateBasicGameFieldData(), opponentShipsPlaced: false};
+
     case ActionType.PLACE_COMPUTER_SHIPS:
       return {
         ...state,

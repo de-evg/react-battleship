@@ -1,5 +1,5 @@
 /* eslint-disable default-case */
-import {ActionType} from "../../action";
+import {ActionCreator, ActionType} from "../../action";
 
 const generateAimList = () => {
   const aimList = []; 
@@ -13,7 +13,7 @@ const generateAimList = () => {
 };
 
 const initialState = {
-  isPlayerMove: false,
+  isPlayerMove: Math.random() > 0.5,
   isReplayMove: false,
   computerLastShot: ``,
   playerLastShot: ``,
@@ -29,12 +29,16 @@ const initialState = {
     verticalDown: [],
     horizontalUp: [],
     horizontalDown: []
-  }
+  },
+  isGameOver: false,
+  winner: ``
 };
 
 export const singleplayerGame = (state = initialState, action) => {
   switch (action.type) {
     case ActionType.UPDATE_SINGLEPLAYER_GAME:
+      return {...state, ...action.payload}
+    case ActionType.SET_WINNER:
       return {...state, ...action.payload}
   }
   return state;
