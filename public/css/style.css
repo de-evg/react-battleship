@@ -15,11 +15,6 @@ ul {
   width: 100%;
 }
 
-.container {
-  display: flex;
-  flex-direction: row;
-}
-
 .game__container {
   margin: 0 auto;
   padding-top: 25%;
@@ -188,8 +183,8 @@ ul {
 
 .square {
   box-sizing: border-box;
-  width: 29px;
-  height: 29px;
+  width: 40px;
+  height: 40px;
 
   display: flex;
   justify-content: center;
@@ -434,11 +429,8 @@ ul {
   }
 }
 
-.container {
-  flex-direction: column;
-}
-
 .main {
+  margin: 0 auto;
   margin-bottom: 15px;
   display: flex;
   flex-direction: row;
@@ -611,25 +603,11 @@ ul {
   );
 }
 
-.main {
-  width: 1340px;
-  margin: 0 auto;
-}
-
 .game {
   display: flex;
   flex-wrap: wrap;
   width: 550px;
   flex-basis: 320px;
-}
-
-.game__column-name {
-  display: flex;
-}
-
-.square {
-  width: 40px;
-  height: 40px;
 }
 
 .battlefield .destroyed::before {
@@ -691,7 +669,6 @@ ul {
   border: 30px solid transparent;
   border-right-color: #000;
 }
-
 
 .info__move-arrow--right::before {
   position: absolute;

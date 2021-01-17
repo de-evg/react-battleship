@@ -20,7 +20,7 @@ const BattlefieldRow = ({columnData, isPlayerField, gameMode}) => {
 BattlefieldRow.propTypes = {
   columnData: PropTypes.array.isRequired,
   isPlayerField: PropTypes.bool.isRequired,
-  gameMode: PropTypes.string.gameMode
+  gameMode: PropTypes.string.isRequired
 };
 
 export default BattlefieldRow;

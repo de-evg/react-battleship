@@ -16,7 +16,8 @@ export const ActionType = {
   UPDATE_SINGLEPLAYER_GAME: `UPDATE_SINGLEPLAYER_GAME`,
   UPDATE_OPPONENT_SHIPS: `UPDATE_OPPONENT_SHIPS`,
   UPDATE_OPPONENT_FIELD: `UPDATE_OPPONENT_FIELD`,
-  SET_WINNER: `SET_WINNER`
+  SET_WINNER: `SET_WINNER`,
+  RESET_SINGLEPLAYER_SETTINGS: `RESET_SINGLEPLAYER_SETTINGS`
 };
 
 export const ActionCreator = {
@@ -83,5 +84,8 @@ export const ActionCreator = {
   setWinner: (winner) => ({
     type: `SET_WINNER`,
     payload: winner
+  }),
+  resetSingleplayerGameSettings: () => ({
+    type: `RESET_SINGLEPLAYER_SETTINGS`,
   })
 };
