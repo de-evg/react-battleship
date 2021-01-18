@@ -326,7 +326,7 @@ const UserFiled = ({
 UserFiled.propTypes = {
   playerField: PropTypes.object.isRequired,
   playerShipsData: PropTypes.object.isRequired,
-  currentShipOnPlace: PropTypes.object.isRequired,
+  currentShipOnPlace: PropTypes.oneOfType([PropTypes.number, PropTypes.object]).isRequired,
   gameMode: PropTypes.string.isRequired,
   updateDataOnMouseOut: PropTypes.func.isRequired,
   updateUserFiled: PropTypes.func.isRequired,

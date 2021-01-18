@@ -136,7 +136,7 @@ const SingleplayerScreen = ({
           <h1 className="visually--hidden">Морской бой</h1>
           <button ref={navToggleRef} className="nav-toggle" onClick={handleNavToggleBtnClick}></button>
           <nav ref={navRef} className="nav">
-            <Link className="btn nav__item" to={appRoute.MAIN}>
+            <Link className="btn nav__item" to={appRoute.MAIN} onClick={handleResetBtnClick}>
               Главное меню
             </Link>
             <button className="btn nav__item" onClick={handleResetBtnClick}>
@@ -230,6 +230,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(ActionCreator.resetOpponentShips());
     dispatch(ActionCreator.resetOpponentField());
     dispatch(ActionCreator.setWinner({winner: ``, isGameOver: false}));
+    dispatch(ActionCreator.resetSingleplayerGameSettings());
   },
   makeAComputerMove({ playerShipsData, playerField, singleplayerGame }) {
     dispatch(ActionCreator.updateUserShips(playerShipsData));

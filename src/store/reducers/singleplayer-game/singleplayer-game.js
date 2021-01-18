@@ -34,12 +34,14 @@ const initialState = {
   winner: ``
 };
 
-export const singleplayerGame = (state = initialState, action) => {
+export const singleplayerGame = (state = {...initialState}, action) => {
   switch (action.type) {
     case ActionType.UPDATE_SINGLEPLAYER_GAME:
       return {...state, ...action.payload}
     case ActionType.SET_WINNER:
       return {...state, ...action.payload}
+    case ActionType.RESET_SINGLEPLAYER_SETTINGS:
+        return {...state, ...initialState}
   }
   return state;
 };
