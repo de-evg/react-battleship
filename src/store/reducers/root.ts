@@ -6,16 +6,15 @@ import {playerField} from "./player-field/player-field";
 import {playerShips} from "./player-ships/player-ships";
 import {singleplayerGame} from "./singleplayer-game/singleplayer-game";
 
-const NameSpace = {
+export const NameSpace = {
   PLAYER_FIELD: `PLAYER_FIELD`,
   PLAYER_SHIPS: `PLAYER_SHIPS`,
   OPPONENT_FIELD: `OPPONENT_FIELD`,
   OPPONENT_SHIPS: `OPPONENT_SHIPS`,
   GAME_MODE: `GAME_MODE`,
   SINGLEPLAYER_GAME: `SINGLEPLAYER_GAME`
-};
+} as const;
 
-export {NameSpace};
 export default combineReducers({
   [NameSpace.PLAYER_FIELD]: playerField,
   [NameSpace.PLAYER_SHIPS]: playerShips,

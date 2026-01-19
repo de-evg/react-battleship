@@ -1,58 +1,71 @@
 import {ShotStatus} from "../const";
 import { generateRandomNumber } from "../utils/common";
+import { GameFieldData } from "../utils/fields";
+import { ShipList } from "../utils/ships";
+import { SingleplayerGameState } from "../store/reducers/singleplayer-game/singleplayer-game";
 
-export const generateComputerMove = (playerField, playerShipsData, singleplayerGameData) => {
+interface ComputerMoveResult {
+  playerField: GameFieldData;
+  playerShipsData: ShipList;
+  singleplayerGame: SingleplayerGameState;
+}
+
+export const generateComputerMove = (
+  playerField: GameFieldData,
+  playerShipsData: ShipList,
+  singleplayerGameData: SingleplayerGameState
+): ComputerMoveResult => {
   const nextAimList = [ ...singleplayerGameData.aimList ];
-  const generateRandomAimIndex = () =>
+  const generateRandomAimIndex = (): number =>
     generateRandomNumber(0, nextAimList.length);
 
   const nextPlayerField = { ...playerField };
   const shipsData = { ...playerShipsData };
   const gameData = { ...singleplayerGameData };
 
-  const changeDirection = (gameData) => {
+  const changeDirection = (gameData: SingleplayerGameState): void => {
     gameData.isDirectionToUpper = !gameData.isDirectionToUpper;
     gameData.isDirectionChanged = !gameData.isDirectionChanged;
   };
 
-  const changeOrientation = (gameData) => {
+  const changeOrientation = (gameData: SingleplayerGameState): void => {
     gameData.isVertical = !gameData.isVertical;
     gameData.isOrietationChanged = !gameData.isOrietationChanged;
   };
 
-  const shot = (aimIndex) => {
+  const shot = (aimIndex: number): void => {
     const aimNumber = nextAimList.splice(aimIndex, 1);
     gameData.aimList = nextAimList;
     gameData.computerLastShot = aimNumber[0];
 
     const column = aimNumber[0].slice(0, 1);
-    const row = aimNumber[0].slice(1);
+    const row = parseInt(aimNumber[0].slice(1));
 
-    const onHit = () => {
-      const shipType = nextPlayerField["column" + column][row].shipID.slice(
+    const onHit = (): void => {
+      const shipType = nextPlayerField["column" + column][row].shipID!.slice(
         0,
         1
       );
-      const shipNumber = nextPlayerField["column" + column][row].shipID.slice(
+      const shipNumber = nextPlayerField["column" + column][row].shipID!.slice(
         -1
       );
-      const shipOnFire = shipsData["deck" + shipType][shipNumber];
+      const shipOnFire = shipsData["deck" + shipType as keyof ShipList][parseInt(shipNumber)];
 
-      const updateShipsData = () => {
+      const updateShipsData = (): void => {
         if (shipOnFire.hits.length) {
           shipOnFire.hits.splice(0, 1);
         }
         shipOnFire.isDestroyed = shipOnFire.hits.length === 0 ? true : false;
-        shipsData["deck" + shipType][shipNumber] = shipOnFire;
+        shipsData["deck" + shipType as keyof ShipList][parseInt(shipNumber)] = shipOnFire;
       };
 
-      const updateFieldsData = () => {
+      const updateFieldsData = (): void => {
         nextPlayerField["column" + column][row].isHit = true;
         if (shipOnFire.isDestroyed) {
-          const splitedElements = [];
+          const splitedElements: string[][] = [];
           shipOnFire.coords.forEach((coord) => {
             let columnNumber = coord.slice(0, 1);
-            let rowNumber = coord.slice(-1);
+            let rowNumber = parseInt(coord.slice(-1));
             nextPlayerField["column" + columnNumber][
               rowNumber
             ].isDestroyed = true;
@@ -206,7 +219,7 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
         }
       };
 
-      const generateIntendedAims = () => {
+      const generateIntendedAims = (): void => {
         gameData.computerLastShot = aimNumber[0];
 
         if (
@@ -222,7 +235,7 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
           let rowUp = row;
           let rowDown = row;
 
-          const checkCoords = (coord) =>
+          const checkCoords = (coord: string): number =>
             nextAimList.findIndex((aimCoord) => aimCoord === coord);
 
           if (+column === 0 && +row === 0) {
@@ -257,11 +270,11 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnUp < 9) {
-                columnUp = +columnUp + 1;
+              if (+columnUp < 9) {
+                columnUp = (+columnUp + 1).toString();
               }
-              if (rowUp < 9) {
-                rowUp = +rowUp + 1;
+              if (+rowUp < 9) {
+                rowUp = (+rowUp + 1).toString();
               }
             }
           }
@@ -298,11 +311,11 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnDown > 0) {
-                columnDown = +columnDown - 1;
+              if (+columnDown > 0) {
+                columnDown = (+columnDown - 1).toString();
               }
-              if (rowUp < 9) {
-                rowUp = +rowUp + 1;
+              if (+rowUp < 9) {
+                rowUp = (+rowUp + 1).toString();
               }
             }
           }
@@ -341,11 +354,11 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnDown > 0) {
-                columnDown = +columnDown - 1;
+              if (+columnDown > 0) {
+                columnDown = (+columnDown - 1).toString();
               }
-              if (rowUp > 0) {
-                rowUp = +rowUp - 1;
+              if (+rowUp > 0) {
+                rowUp = (+rowUp - 1).toString();
               }
             }
           }
@@ -384,11 +397,11 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnUp > 0) {
-                columnUp = +columnUp + 1;
+              if (+columnUp < 9) {
+                columnUp = (+columnUp + 1).toString();
               }
-              if (rowDown > 0) {
-                rowDown = +rowDown - 1;
+              if (+rowDown > 0) {
+                rowDown = (+rowDown - 1).toString();
               }
             }
           }
@@ -457,14 +470,14 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnUp > 0) {
-                columnUp = +columnUp + 1;
+              if (+columnUp < 9) {
+                columnUp = (+columnUp + 1).toString();
               }
-              if (columnDown > 0) {
-                columnDown = +columnDown - 1;
+              if (+columnDown > 0) {
+                columnDown = (+columnDown - 1).toString();
               }
-              if (rowUp > 0) {
-                rowUp = +rowUp + 1;
+              if (+rowUp < 9) {
+                rowUp = (+rowUp + 1).toString();
               }
             }
           }
@@ -519,14 +532,14 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnUp > 0) {
-                columnUp = +columnUp + 1;
+              if (+columnUp < 9) {
+                columnUp = (+columnUp + 1).toString();
               }
-              if (columnDown > 0) {
-                columnDown = +columnDown - 1;
+              if (+columnDown > 0) {
+                columnDown = (+columnDown - 1).toString();
               }
-              if (rowDown > 0) {
-                rowDown = +rowDown - 1;
+              if (+rowDown > 0) {
+                rowDown = (+rowDown - 1).toString();
               }
             }
           }
@@ -579,14 +592,14 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnUp > 0) {
-                columnUp = +columnUp + 1;
+              if (+columnUp < 9) {
+                columnUp = (+columnUp + 1).toString();
               }
-              if (rowUp > 0) {
-                rowUp = +rowUp + 1;
+              if (+rowUp < 9) {
+                rowUp = (+rowUp + 1).toString();
               }
-              if (rowDown > 0) {
-                rowDown = +rowDown - 1;
+              if (+rowDown > 0) {
+                rowDown = (+rowDown - 1).toString();
               }
             }
           }
@@ -639,14 +652,14 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnDown > 0) {
-                columnDown = +columnDown - 1;
+              if (+columnDown > 0) {
+                columnDown = (+columnDown - 1).toString();
               }
-              if (rowUp > 0) {
-                rowUp = +rowUp + 1;
+              if (+rowUp < 9) {
+                rowUp = (+rowUp + 1).toString();
               }
-              if (rowDown > 0) {
-                rowDown = +rowDown - 1;
+              if (+rowDown > 0) {
+                rowDown = (+rowDown - 1).toString();
               }
             }
           }
@@ -715,17 +728,17 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
                 }
               }
 
-              if (columnUp > 0) {
-                columnUp = +columnUp + 1;
+              if (+columnUp < 9) {
+                columnUp = (+columnUp + 1).toString();
               }
-              if (columnDown > 0) {
-                columnDown = +columnDown - 1;
+              if (+columnDown > 0) {
+                columnDown = (+columnDown - 1).toString();
               }
-              if (rowUp > 0) {
-                rowUp = +rowUp + 1;
+              if (+rowUp < 9) {
+                rowUp = (+rowUp + 1).toString();
               }
-              if (rowDown > 0) {
-                rowDown = +rowDown - 1;
+              if (+rowDown > 0) {
+                rowDown = (+rowDown - 1).toString();
               }
             }
           }
@@ -786,7 +799,7 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
       gameData.isPlayerMove = false;
     };
 
-    const onMiss = () => {
+    const onMiss = (): void => {
       const prevShotStatus = gameData.shotStatus;
 
       if (gameData.isKeepShooting) {
@@ -815,15 +828,15 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
     playerField["column" + column][row].isShip ? onHit() : onMiss();
   };
 
-  const keepShotOnShip = () => {
-    const generateDirection = () => {
-      let direction = gameData.isVertical
+  const keepShotOnShip = (): void => {
+    const generateDirection = (): keyof SingleplayerGameState['intendedAims'] => {
+      let direction: string = gameData.isVertical
         ? "vertical"
         : "horizontal";
       direction = gameData.isDirectionToUpper
         ? direction + "Up"
         : direction + "Down";
-      return direction;
+      return direction as keyof SingleplayerGameState['intendedAims'];
     };
 
     let direction = generateDirection();
@@ -847,7 +860,7 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
     shot(aimIndex);
   };
 
-  const makeShot = () => {
+  const makeShot = (): void => {
     switch (gameData.shotStatus) {
       case ShotStatus.HIT:
         keepShotOnShip();
@@ -870,5 +883,5 @@ export const generateComputerMove = (playerField, playerShipsData, singleplayerG
     playerField: nextPlayerField,
     playerShipsData: shipsData,
     singleplayerGame: gameData
-  }
+  };
 };

@@ -1,16 +1,22 @@
-import {Winner} from "../const";
+import { Winner, WinnerType } from "../const";
+import { ShipList } from "../utils/ships";
 
-const checkOnDestroyedShips = (shipsData) => {
+interface GameOverResult {
+  isGameOver: boolean;
+  winner: WinnerType | string;
+}
+
+const checkOnDestroyedShips = (shipsData: ShipList): boolean => {
   const shipsTypes = Object.keys(shipsData);
-  let survivingShips = [];
+  let survivingShips: any[] = [];
   shipsTypes.forEach((type) => {
-      const ships = shipsData[type].filter((ship) => !ship.isDestroyed);
+      const ships = shipsData[type as keyof ShipList].filter((ship) => !ship.isDestroyed);
       survivingShips = survivingShips.concat(ships);
   });
   return !survivingShips.length;
 };
 
-export const checkOnGameOver = (firstPlayerShips, secondPlayerShips) => {    
+export const checkOnGameOver = (firstPlayerShips: ShipList, secondPlayerShips: ShipList): GameOverResult => {    
   const isFirstPlayerAllShipsDestroyed = checkOnDestroyedShips(firstPlayerShips);
   const isSecondPlayerAllShipsDestroyed = checkOnDestroyedShips(secondPlayerShips);
   if (isSecondPlayerAllShipsDestroyed) {

@@ -1,17 +1,30 @@
 import React, { useCallback } from "react";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { NameSpace } from "../../store/reducers/root";
 import Battlefield from "../battlefield/battlefield";
 import { GameMode } from "../../const";
-import { ActionCreator, ActionType } from "../../store/action";
-import { checkCoordsOnBlock } from "../../utils/fields";
+import { ActionCreator } from "../../store/action";
+import { checkCoordsOnBlock, GameFieldData } from "../../utils/fields";
+import { ShipList, Ship } from "../../utils/ships";
+import { GameModeType } from "../../const";
 
 const COLUMN_LETTERS = ["", "А", "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К"];
 const ROW_NUMBERS = Array(10).fill(null);
 const IS_PLAYER_FIELD = true;
 
-const UserFiled = ({
+interface UserFieldProps {
+  playerField: GameFieldData;
+  playerShipsData: ShipList;
+  currentShipOnPlace: Ship | {};
+  updateDataOnMouseOut: (newCurrentShip: Ship, newFields: GameFieldData) => void;
+  gameMode: GameModeType;
+  updateUserFiled: (newFields: GameFieldData) => void;
+  placeCurrentShip: (nextShipData: any) => void;
+  shipTypeOnPlace: number;
+  isAllShipPlaced: boolean;
+}
+
+const UserField: React.FC<UserFieldProps> = ({
   playerField,
   playerShipsData,
   currentShipOnPlace,
@@ -23,13 +36,13 @@ const UserFiled = ({
   isAllShipPlaced,
 }) => {
   const handleMouseOver = useCallback(
-    (evtOver) => {
-      if (gameMode === GameMode.ARRAGMENT && !isAllShipPlaced) {
+    (evtOver: React.MouseEvent) => {
+      if (gameMode === GameMode.ARRAGMENT && !isAllShipPlaced && currentShipOnPlace && 'id' in currentShipOnPlace) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
         newCurrentShipOnPlace.coords = [];
 
-        const columnNumber = +evtOver.target.id.slice(0, 1);
-        const rowNumber = +evtOver.target.id.slice(1);
+        const columnNumber = +(evtOver.target as HTMLElement).id.slice(0, 1);
+        const rowNumber = +(evtOver.target as HTMLElement).id.slice(1);
         const deckLength = +newCurrentShipOnPlace.id.slice(0, 1);
 
         if (newCurrentShipOnPlace.isVertical) {
@@ -67,7 +80,7 @@ const UserFiled = ({
           const newFieldsData = { ...playerField };
           newCurrentShipOnPlace.coords.forEach((coord) => {
             newFieldsData["column" + coord.slice(0, 1)][
-              coord.slice(1)
+              parseInt(coord.slice(1))
             ].isShip = true;
           });
           updateDataOnMouseOut(newCurrentShipOnPlace, newFieldsData);
@@ -84,12 +97,12 @@ const UserFiled = ({
   );
 
   const handleMouseOut = useCallback(
-    (evtOut) => {
+    (evtOut: React.MouseEvent) => {
       if (
         gameMode === GameMode.ARRAGMENT &&
-        currentShipOnPlace &&
+        currentShipOnPlace && 'coords' in currentShipOnPlace &&
         !isAllShipPlaced &&
-        !evtOut.target.classList.contains(".ship")
+        !(evtOut.target as HTMLElement).classList.contains(".ship")
       ) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
         const newFieldsData = { ...playerField };
@@ -97,10 +110,10 @@ const UserFiled = ({
         if (!checkCoordsOnBlock(newCurrentShipOnPlace.coords, newFieldsData)) {
           newCurrentShipOnPlace.coords.forEach((coord) => {
             newFieldsData["column" + coord.slice(0, 1)][
-              coord.slice(1)
+              parseInt(coord.slice(1))
             ].isShip = false;
             newFieldsData["column" + coord.slice(0, 1)][
-              coord.slice(1)
+              parseInt(coord.slice(1))
             ].isBlocked = false;
           });
           newCurrentShipOnPlace.coords = [];
@@ -120,11 +133,12 @@ const UserFiled = ({
   );
 
   const handleBattlefieldClick = useCallback(
-    (evt) => {
+    (evt: React.MouseEvent) => {
       if (
         gameMode === GameMode.ARRAGMENT &&
-        evt.target.tagName === "LI" &&
+        (evt.target as HTMLElement).tagName === "LI" &&
         !isAllShipPlaced &&
+        currentShipOnPlace && 'coords' in currentShipOnPlace &&
         !checkCoordsOnBlock(currentShipOnPlace.coords, playerField)
       ) {
         const shipType = "deck" + currentShipOnPlace.id.slice(0, 1);
@@ -133,27 +147,27 @@ const UserFiled = ({
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
         newCurrentShipOnPlace.isPlaced = true;
         const currentShipsData = { ...playerShipsData };
-        currentShipsData[shipType][shipNumber] = newCurrentShipOnPlace;
+        currentShipsData[shipType as keyof ShipList][shipNumber] = newCurrentShipOnPlace;
 
         const newFieldsData = { ...playerField };
         newCurrentShipOnPlace.coords.forEach((coord) => {
           newFieldsData["column" + coord.slice(0, 1)][
-            coord.slice(1)
+            parseInt(coord.slice(1))
           ].isShip = true;
           newFieldsData["column" + coord.slice(0, 1)][
-            coord.slice(1)
+            parseInt(coord.slice(1))
           ].isBlocked = true;
-          newFieldsData["column" + coord.slice(0, 1)][coord.slice(1)].shipID =
+          newFieldsData["column" + coord.slice(0, 1)][parseInt(coord.slice(1))].shipID =
             newCurrentShipOnPlace.id;
 
           if (+coord.slice(0, 1) > 0) {
             newFieldsData["column" + (+coord.slice(0, 1) - 1)][
-              coord.slice(1)
+              parseInt(coord.slice(1))
             ].isBlocked = true;
           }
           if (+coord.slice(0, 1) < 9) {
             newFieldsData["column" + (+coord.slice(0, 1) + 1)][
-              +coord.slice(1)
+              parseInt(coord.slice(1))
             ].isBlocked = true;
           }
           if (+coord.slice(1) > 0) {
@@ -190,17 +204,17 @@ const UserFiled = ({
         });
 
         const isShipsTypePlaced = !playerShipsData[
-          "deck" + shipTypeOnPlace
+          "deck" + shipTypeOnPlace as keyof ShipList
         ].find((ship) => ship.isPlaced === false);
 
         const nextShipTypeOnPlace = isShipsTypePlaced
           ? shipTypeOnPlace - 1
           : shipTypeOnPlace;
         const nextShipOnPlaced = nextShipTypeOnPlace
-          ? playerShipsData["deck" + nextShipTypeOnPlace].find(
+          ? playerShipsData["deck" + nextShipTypeOnPlace as keyof ShipList].find(
               (shipData) => !shipData.isPlaced
             )
-          : nextShipTypeOnPlace;
+          : null;
 
         const isArrigementOver = !nextShipTypeOnPlace;
 
@@ -225,8 +239,8 @@ const UserFiled = ({
   );
 
   const handleRotate = useCallback(
-    (evt) => {
-      if (gameMode === GameMode.ARRAGMENT) {
+    (evt: React.WheelEvent) => {
+      if (gameMode === GameMode.ARRAGMENT && currentShipOnPlace && 'id' in currentShipOnPlace) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
         const newFieldsData = { ...playerField };
 
@@ -235,16 +249,16 @@ const UserFiled = ({
         if (!checkCoordsOnBlock(newCurrentShipOnPlace.coords, newFieldsData)) {
           newCurrentShipOnPlace.coords.forEach((coord) => {
             newFieldsData["column" + coord.slice(0, 1)][
-              coord.slice(1)
+              parseInt(coord.slice(1))
             ].isShip = false;
             newFieldsData["column" + coord.slice(0, 1)][
-              coord.slice(1)
+              parseInt(coord.slice(1))
             ].isBlocked = false;
           });
 
           newCurrentShipOnPlace.coords = [];
-          const columnNumber = +evt.target.id.slice(0, 1);
-          const rowNumber = +evt.target.id.slice(1);
+          const columnNumber = +(evt.target as HTMLElement).id.slice(0, 1);
+          const rowNumber = +(evt.target as HTMLElement).id.slice(1);
           const deckLength = +newCurrentShipOnPlace.id.slice(0, 1);
 
           if (newCurrentShipOnPlace.isVertical) {
@@ -262,13 +276,9 @@ const UserFiled = ({
           } else {
             for (let i = 0; i < deckLength; i++) {
               if (deckLength <= 10 - columnNumber) {
-                newCurrentShipOnPlace.coords.push(
-                  (columnNumber + i).toString() + rowNumber
-                );
+                newCurrentShipOnPlace.coords.push((columnNumber + i).toString() + rowNumber);
               } else {
-                newCurrentShipOnPlace.coords.push(
-                  (columnNumber - i).toString() + rowNumber
-                );
+                newCurrentShipOnPlace.coords.push((columnNumber - i).toString() + rowNumber);
               }
             }
           }
@@ -281,7 +291,7 @@ const UserFiled = ({
           if (!isCoordsBloked) {
             newCurrentShipOnPlace.coords.forEach((coord) => {
               newFieldsData["column" + coord.slice(0, 1)][
-                coord.slice(1)
+                parseInt(coord.slice(1))
               ].isShip = true;
             });
           }
@@ -323,19 +333,7 @@ const UserFiled = ({
   );
 };
 
-UserFiled.propTypes = {
-  playerField: PropTypes.object.isRequired,
-  playerShipsData: PropTypes.object.isRequired,
-  currentShipOnPlace: PropTypes.oneOfType([PropTypes.number, PropTypes.object]).isRequired,
-  gameMode: PropTypes.string.isRequired,
-  updateDataOnMouseOut: PropTypes.func.isRequired,
-  updateUserFiled: PropTypes.func.isRequired,
-  shipTypeOnPlace: PropTypes.number.isRequired,
-  placeCurrentShip: PropTypes.func.isRequired,
-  isAllShipPlaced: PropTypes.bool.isRequired,
-};
-
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: any) => ({
   playerShipsData: state[NameSpace.PLAYER_SHIPS].playerShipsData,
   playerField: state[NameSpace.PLAYER_FIELD].playerField,
   currentShipOnPlace: state[NameSpace.PLAYER_SHIPS].currentShipOnPlace,
@@ -344,25 +342,25 @@ const mapStateToProps = (state) => ({
   isAllShipPlaced: state[NameSpace.PLAYER_SHIPS].isAllShipPlaced,
 });
 
-const mapDispatchToProps = (dispath) => ({
-  updateDataOnMouseOut(newCurrentShip, newFields) {
-    dispath(ActionCreator.updateShipOnPlace(newCurrentShip));
-    dispath(ActionCreator.updateUserField(newFields));
+const mapDispatchToProps = (dispatch: any) => ({
+  updateDataOnMouseOut(newCurrentShip: Ship, newFields: GameFieldData) {
+    dispatch(ActionCreator.updateShipOnPlace(newCurrentShip));
+    dispatch(ActionCreator.updateUserField(newFields));
   },
-  updateUserFiled(newFields) {
-    dispath(ActionCreator.updateUserField(newFields));
+  updateUserFiled(newFields: GameFieldData) {
+    dispatch(ActionCreator.updateUserField(newFields));
   },
-  placeCurrentShip(nextShipData) {
-    dispath(
+  placeCurrentShip(nextShipData: any) {
+    dispatch(
       ActionCreator.placeShip({
         shipTypeOnPlace: nextShipData.shipTypeOnPlace,
         playerShipsData: nextShipData.playerShipsData,
         isAllShipPlaced: nextShipData.isAllShipPlaced,
       })
     );
-    dispath(ActionCreator.updateUserField(nextShipData.playerField));
-    dispath(ActionCreator.updateShipOnPlace(nextShipData.currentShipOnPlace));
+    dispatch(ActionCreator.updateUserField(nextShipData.playerField));
+    dispatch(ActionCreator.updateShipOnPlace(nextShipData.currentShipOnPlace));
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserFiled);
+export default connect(mapStateToProps, mapDispatchToProps)(UserField);

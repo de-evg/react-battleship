@@ -1,8 +1,14 @@
 import React from "react";
-import PropTypes from "prop-types";
-import {GameMode} from "../../const";
+import { GameModeType, GameMode } from "../../const";
+import { FieldCell } from "../../utils/fields";
 
-const Square = ({ fieldData: { id, isShip, isHit, isMiss}, isPlayerField, gameMode }) => {
+interface SquareProps {
+  fieldData: FieldCell;
+  isPlayerField: boolean;
+  gameMode: GameModeType;
+}
+
+const Square: React.FC<SquareProps> = ({ fieldData: { id, isShip, isHit, isMiss}, isPlayerField, gameMode }) => {
   const DEFAULT_CLASS = "square battlefield__square";
   let squareClasses = `${DEFAULT_CLASS}`;
   squareClasses = isShip && isPlayerField || isShip && gameMode === GameMode.GAME_OVER ? `${DEFAULT_CLASS} ship` : squareClasses;
@@ -20,13 +26,5 @@ const Square = ({ fieldData: { id, isShip, isHit, isMiss}, isPlayerField, gameMo
     </>
   );
 };
-
-Square.propTypes = {
-  fieldData: PropTypes.object.isRequired,
-  isPlayerField: PropTypes.bool.isRequired,
-  gameMode: PropTypes.string.isRequired
-};
-
-
 
 export default Square;

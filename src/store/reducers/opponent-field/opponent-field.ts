@@ -2,15 +2,22 @@
 import {
   generateBasicGameFieldData,
   placeComputerShips,
+  GameFieldData,
 } from "../../../utils/fields";
 import { ActionType } from "../../action";
+import { Action } from "../../action";
 
-const initialState = {
+interface OpponentFieldState {
+  opponentField: GameFieldData;
+  opponentShipsPlaced: boolean;
+}
+
+const initialState: OpponentFieldState = {
   opponentField: generateBasicGameFieldData(),
   opponentShipsPlaced: false,
 };
 
-export const opponentField = (state = initialState, action) => {
+export const opponentField = (state: OpponentFieldState = initialState, action: Action): OpponentFieldState => {
   switch (action.type) {
     case ActionType.RESET_OPPONENT_FIELD:
       return { ...state, opponentField: generateBasicGameFieldData(), opponentShipsPlaced: false};

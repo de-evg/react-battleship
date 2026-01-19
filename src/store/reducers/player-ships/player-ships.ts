@@ -1,19 +1,26 @@
 /* eslint-disable default-case */
 
-import { generateShipList } from "../../../utils/ships";
+import { generateShipList, ShipList } from "../../../utils/ships";
 import { ActionType } from "../../action";
+import { Action } from "../../action";
 
 const DEFAULT_SHIP_TYPE = 4;
 
-const initialState = {
+interface PlayerShipsState {
+  playerShipsData: ShipList;
+  currentShipOnPlace: any;
+  shipTypeOnPlace: number;
+  isAllShipPlaced: boolean;
+}
+
+const initialState: PlayerShipsState = {
   playerShipsData: generateShipList(),
   currentShipOnPlace: {},
   shipTypeOnPlace: DEFAULT_SHIP_TYPE,
   isAllShipPlaced: false,
-  shipTypeOnPlace: 4,
 };
 
-export const playerShips = (state = { ...initialState }, action) => {
+export const playerShips = (state: PlayerShipsState = { ...initialState }, action: Action): PlayerShipsState => {
   switch (action.type) {
     case ActionType.RESET_USER_SHIPS:
       return { ...state, ...initialState, playerShipsData: generateShipList() };
@@ -34,7 +41,7 @@ export const playerShips = (state = { ...initialState }, action) => {
       return {
         ...state,
         playerShipsData: action.payload
-      }
+      };
   }
   return state;
 };

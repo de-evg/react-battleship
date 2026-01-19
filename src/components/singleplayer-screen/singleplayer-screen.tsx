@@ -1,17 +1,37 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
 import { appRoute, GameMode, Winner } from "../../const";
 import { NameSpace } from "../../store/reducers/root";
 import OpponentField from "../opponent-field/opponent-field";
-import UserFiled from "../user-field/user-field";
+import UserField from "../user-field/user-field";
 import { ActionCreator } from "../../store/action";
 import { generateComputerMove } from "../../move-model/computer-move";
 import { generatePlayerMove } from "../../move-model/player-move";
 import { checkOnGameOver } from "../../move-model/victory";
+import { GameModeType, WinnerType } from "../../const";
+import { GameFieldData } from "../../utils/fields";
+import { ShipList } from "../../utils/ships";
+import { SingleplayerGameState } from "../../store/reducers/singleplayer-game/singleplayer-game";
 
-const SingleplayerScreen = ({
+interface SingleplayerScreenProps extends RouteComponentProps {
+  gameMode: GameModeType;
+  updateGameMode: (mode: GameModeType) => void;
+  setShipOnPlace: (newShip: any) => void;
+  shipTypeOnPlace: number;
+  playerShipsData: ShipList;
+  resetGame: () => void;
+  isAllShipPlaced: boolean;
+  singleplayerGame: SingleplayerGameState;
+  playerField: GameFieldData;
+  makeAComputerMove: (move: any) => void;
+  makeAPlayerMove: (move: any) => void;
+  opponentShipsData: ShipList | {};
+  opponentField: GameFieldData;
+  setWinner: (winner: any) => void;
+}
+
+const SingleplayerScreen: React.FC<SingleplayerScreenProps> = ({
   gameMode,
   updateGameMode,
   setShipOnPlace,
@@ -29,14 +49,14 @@ const SingleplayerScreen = ({
 }) => {
   const { isPlayerMove, isReplayMove, isGameOver, winner } = singleplayerGame;
   const [isCompMove, setCompMove] = useState(true);
-  const navRef = useRef();
-  const navToggleRef = useRef();
+  const navRef = useRef<HTMLElement>(null);
+  const navToggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (gameMode === GameMode.GAME) {
-      const winner = checkOnGameOver(playerShipsData, opponentShipsData);
-      if (winner.isGameOver) {
-        setWinner(winner);
+      const winnerResult = checkOnGameOver(playerShipsData, opponentShipsData as ShipList);
+      if (winnerResult.isGameOver) {
+        setWinner(winnerResult);
         updateGameMode(GameMode.GAME_OVER);
       }
     }
@@ -50,7 +70,7 @@ const SingleplayerScreen = ({
       updateGameMode(GameMode.SINGLE_SHIPS_READY);
     }
 
-    let delay;
+    let delay: NodeJS.Timeout | undefined;
     if (gameMode === GameMode.GAME && (!isPlayerMove || isReplayMove)) {
       delay = setTimeout(() => setCompMove(true), 700);
     }
@@ -64,7 +84,9 @@ const SingleplayerScreen = ({
       setCompMove(false);
       makeAComputerMove(computerMove);
     }
-    return () => clearTimeout(delay);
+    return () => {
+      if (delay) clearTimeout(delay);
+    };
   }, [
     setCompMove,
     isReplayMove,
@@ -81,7 +103,7 @@ const SingleplayerScreen = ({
 
   const handlePlaceShipBtnClick = useCallback(() => {
     updateGameMode(GameMode.ARRAGMENT);
-    const firstShip = playerShipsData["deck" + shipTypeOnPlace][0];
+    const firstShip = playerShipsData["deck" + shipTypeOnPlace as keyof ShipList][0];
     setShipOnPlace(firstShip);
   }, [updateGameMode, setShipOnPlace, shipTypeOnPlace, playerShipsData]);
 
@@ -90,33 +112,35 @@ const SingleplayerScreen = ({
   }, [resetGame]);
 
   const handleStartGameBtnClick = useCallback(() => {
-    navRef.current.classList.add(`nav--hidden`);
-    navToggleRef.current.classList.add(`nav-toggle--hidden`);
+    if (navRef.current) navRef.current.classList.add(`nav--hidden`);
+    if (navToggleRef.current) navToggleRef.current.classList.add(`nav-toggle--hidden`);
     updateGameMode(GameMode.GAME);
   }, [updateGameMode]);
 
   const handleNavToggleBtnClick = useCallback(() => {
-    navRef.current.classList.toggle(`nav--hidden`);
-    navToggleRef.current.classList.toggle(`nav-toggle--hidden`);
+    if (navRef.current) navRef.current.classList.toggle(`nav--hidden`);
+    if (navToggleRef.current) navToggleRef.current.classList.toggle(`nav-toggle--hidden`);
   }, []);
 
   const handlePlayerMove = useCallback(
-    (evt) => {
+    (evt: React.MouseEvent) => {
       if (
-        evt.target.tagName === "LI" &&
-        evt.target.classList.contains(`battlefield__square`) &&
-        !evt.target.classList.contains(`miss`) &&
-        !evt.target.classList.contains(`hit`) &&
+        (evt.target as HTMLElement).tagName === "LI" &&
+        (evt.target as HTMLElement).classList.contains(`battlefield__square`) &&
+        !(evt.target as HTMLElement).classList.contains(`miss`) &&
+        !(evt.target as HTMLElement).classList.contains(`hit`) &&
         gameMode === GameMode.GAME &&
         isPlayerMove
       ) {
         const playerMove = generatePlayerMove(
-          evt.target,
+          evt.target as HTMLElement,
           opponentField,
-          opponentShipsData,
+          opponentShipsData as ShipList,
           singleplayerGame
         );
-        makeAPlayerMove(playerMove);
+        if (playerMove) {
+          makeAPlayerMove(playerMove);
+        }
       }
     },
     [
@@ -156,7 +180,7 @@ const SingleplayerScreen = ({
           
         </header>
         <main className="main">
-          <UserFiled />
+          <UserField />
           {gameMode === GameMode.GAME && isPlayerMove && !isGameOver && (
             <p className="info info__move-arrow--right">Ваш ход</p>
           )}
@@ -188,24 +212,7 @@ const SingleplayerScreen = ({
   );
 };
 
-SingleplayerScreen.propTypes = {
-  gameMode: PropTypes.string.isRequired,
-  updateGameMode: PropTypes.func.isRequired,
-  setShipOnPlace: PropTypes.func.isRequired,
-  shipTypeOnPlace: PropTypes.number.isRequired,
-  playerShipsData: PropTypes.object.isRequired,
-  resetGame: PropTypes.func.isRequired,
-  isAllShipPlaced: PropTypes.bool.isRequired,
-  singleplayerGame: PropTypes.object.isRequired,
-  playerField: PropTypes.object.isRequired,
-  makeAComputerMove: PropTypes.func.isRequired,
-  makeAPlayerMove: PropTypes.func.isRequired,
-  opponentField: PropTypes.object.isRequired,
-  opponentShipsData: PropTypes.object.isRequired,
-  setWinner: PropTypes.func.isRequired,
-};
-
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: any) => ({
   gameMode: state[NameSpace.GAME_MODE].gameMode,
   shipTypeOnPlace: state[NameSpace.PLAYER_SHIPS].shipTypeOnPlace,
   playerShipsData: state[NameSpace.PLAYER_SHIPS].playerShipsData,
@@ -216,11 +223,11 @@ const mapStateToProps = (state) => ({
   opponentShipsData: state[NameSpace.OPPONENT_SHIPS].opponentShipsData,
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  updateGameMode(mode) {
+const mapDispatchToProps = (dispatch: any) => ({
+  updateGameMode(mode: GameModeType) {
     dispatch(ActionCreator.changeGameMode(mode));
   },
-  setShipOnPlace(newShip) {
+  setShipOnPlace(newShip: any) {
     dispatch(ActionCreator.updateShipOnPlace(newShip));
   },
   resetGame() {
@@ -232,17 +239,17 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(ActionCreator.setWinner({winner: ``, isGameOver: false}));
     dispatch(ActionCreator.resetSingleplayerGameSettings());
   },
-  makeAComputerMove({ playerShipsData, playerField, singleplayerGame }) {
+  makeAComputerMove({ playerShipsData, playerField, singleplayerGame }: any) {
     dispatch(ActionCreator.updateUserShips(playerShipsData));
     dispatch(ActionCreator.updateUserField(playerField));
     dispatch(ActionCreator.updateSingleplayerGame(singleplayerGame));
   },
-  makeAPlayerMove({ opponentShipsData, opponentField, singleplayerGame }) {
+  makeAPlayerMove({ opponentShipsData, opponentField, singleplayerGame }: any) {
     dispatch(ActionCreator.updateOpponentShips(opponentShipsData));
     dispatch(ActionCreator.updateOpponentField(opponentField));
     dispatch(ActionCreator.updateSingleplayerGame(singleplayerGame));
   },
-  setWinner(winner) {
+  setWinner(winner: any) {
     dispatch(ActionCreator.setWinner(winner));
   },
 });

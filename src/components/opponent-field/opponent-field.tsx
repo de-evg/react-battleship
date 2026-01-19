@@ -1,23 +1,34 @@
 import React, {useEffect} from "react";
-import PropTypes from "prop-types";
 import {connect} from "react-redux";
 import {NameSpace} from "../../store/reducers/root";
 import Battlefield from "../battlefield/battlefield";
 import {GameMode} from "../../const";
 import {ActionCreator} from "../../store/action";
+import { GameFieldData } from "../../utils/fields";
+import { ShipList } from "../../utils/ships";
+import { GameModeType } from "../../const";
 
 const COLUMN_LETTERS = ["", "А", "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К"];
 const ROW_NUMBERS = Array(10).fill(null);
 const IS_PLAYER_FIELD = false;
 
+interface OpponentFieldProps {
+  gameMode: GameModeType;
+  opponentField: GameFieldData;
+  opponentShipsData: ShipList | {};
+  generateRandomShips: () => void;
+  placeShips: (fieldsData: GameFieldData, shipsData: ShipList) => void;
+  opponentShipsPlaced: boolean;
+  onBattlefieldClickHandler: (e: React.MouseEvent) => void;
+}
 
-const OpponentField = ({gameMode, opponentField, opponentShipsData, generateRandomShips, placeShips, opponentShipsPlaced, onBattlefieldClickHandler}) => {
+const OpponentField: React.FC<OpponentFieldProps> = ({gameMode, opponentField, opponentShipsData, generateRandomShips, placeShips, opponentShipsPlaced, onBattlefieldClickHandler}) => {
   useEffect(() => {
     if (gameMode === GameMode.ARRAGMENT && !Object.keys(opponentShipsData).length) {
       generateRandomShips();      
     }
     if (Object.keys(opponentShipsData).length && !opponentShipsPlaced) {
-      placeShips(opponentField, opponentShipsData);
+      placeShips(opponentField, opponentShipsData as ShipList);
     }
   }, [gameMode, generateRandomShips, opponentField, opponentShipsData, placeShips, opponentShipsPlaced]);
 
@@ -48,29 +59,19 @@ const OpponentField = ({gameMode, opponentField, opponentShipsData, generateRand
   );
 };
 
-OpponentField.propTypes = {
-  opponentField: PropTypes.object.isRequired,
-  gameMode: PropTypes.string.isRequired,
-  generateRandomShips: PropTypes.func.isRequired,
-  opponentShipsData: PropTypes.object.isRequired,
-  placeShips: PropTypes.func.isRequired,
-  opponentShipsPlaced: PropTypes.bool.isRequired,
-  onBattlefieldClickHandler: PropTypes.func.isRequired
-};
-
-const mapStateToProps = (state) => ({  
+const mapStateToProps = (state: any) => ({  
   opponentShipsData: state[NameSpace.OPPONENT_SHIPS].opponentShipsData,
   opponentField: state[NameSpace.OPPONENT_FIELD].opponentField,
   gameMode: state[NameSpace.GAME_MODE].gameMode,
   opponentShipsPlaced: state[NameSpace.OPPONENT_FIELD].opponentShipsPlaced
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch: any) => ({
   generateRandomShips() {
     dispatch(ActionCreator.generateComputerShips());
     
   },
-  placeShips(fieldsData, shipsData) {
+  placeShips(fieldsData: GameFieldData, shipsData: ShipList) {
     dispatch(ActionCreator.placeComputerShips({fieldsData, shipsData}));
     dispatch(ActionCreator.opponentShipPlaced());
   }

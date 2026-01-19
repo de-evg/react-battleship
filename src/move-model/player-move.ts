@@ -1,47 +1,56 @@
+import { GameFieldData } from "../utils/fields";
+import { ShipList } from "../utils/ships";
+
+interface PlayerMoveResult {
+  opponentShipsData: ShipList;
+  opponentField: GameFieldData;
+  singleplayerGame: any;
+}
+
 export const generatePlayerMove = (
-  target,
-  opponentFieldData,
-  shipsData,
-  gameData
-) => {
+  target: { id: string },
+  opponentFieldData: GameFieldData,
+  shipsData: ShipList,
+  gameData: any
+): PlayerMoveResult | undefined => {
   const newOpponentFieldData = { ...opponentFieldData };
   const newGameData = { ...gameData };
   const newShipsData = { ...shipsData };
   if (
-    !newOpponentFieldData["column" + target.id.slice(0, 1)][target.id.slice(-1)]
+    !newOpponentFieldData["column" + target.id.slice(0, 1)][parseInt(target.id.slice(-1))]
       .isHit ||
-    !newOpponentFieldData["column" + target.id.slice(0, 1)][target.id.slice(-1)]
+    !newOpponentFieldData["column" + target.id.slice(0, 1)][parseInt(target.id.slice(-1))]
       .isMiss
   ) {
     const columnNumber = target.id.slice(0, 1);
-    const rowNumber = target.id.slice(1);
+    const rowNumber = parseInt(target.id.slice(1));
 
-    const checkFieldOnShip = () => {
+    const checkFieldOnShip = (): boolean => {
       const isShip =
         newOpponentFieldData["column" + columnNumber][rowNumber].isShip;
       return isShip;
     };
 
-    const onHit = () => {
+    const onHit = (): void => {
       const shipType = newOpponentFieldData["column" + columnNumber][
         rowNumber
-      ].shipID.slice(0, 1);
+      ].shipID!.slice(0, 1);
       const shipNumber = newOpponentFieldData["column" + columnNumber][
         rowNumber
-      ].shipID.slice(-1);
-      const shipOnFire = newShipsData["deck" + shipType][shipNumber];
+      ].shipID!.slice(-1);
+      const shipOnFire = newShipsData["deck" + shipType as keyof ShipList][parseInt(shipNumber)];
 
-      const updateShipsOnHit = () => {
+      const updateShipsOnHit = (): void => {
         if (shipOnFire.hits.length > 0) {
           shipOnFire.hits.splice(0, 1);
           shipOnFire.isDestroyed = shipOnFire.hits.length === 0 ? true : false;
         } else {
           shipOnFire.isDestroyed = true;
         }
-        newShipsData["deck" + shipType][shipNumber] = shipOnFire;
+        newShipsData["deck" + shipType as keyof ShipList][parseInt(shipNumber)] = shipOnFire;
       };
 
-      const updateFieldOnHit = () => {
+      const updateFieldOnHit = (): void => {
         newOpponentFieldData["column" + columnNumber][rowNumber].isHit = true;
         if (shipOnFire.isDestroyed) {
           shipOnFire.coords.forEach((coord) => {
@@ -123,7 +132,7 @@ export const generatePlayerMove = (
       updateFieldOnHit();
     };
 
-    const onMiss = () => {
+    const onMiss = (): void => {
       newOpponentFieldData["column" + columnNumber][rowNumber].isMiss = true;
       newGameData.isReplayMove = false;
       newGameData.isPlayerMove = false;

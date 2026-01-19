@@ -1,10 +1,14 @@
 import React, {useCallback, useEffect} from "react";
-import PropTypes from "prop-types";
+import {RouteComponentProps} from "react-router-dom";
 import {appRoute} from "../../const";
 import {connect} from "react-redux";
 import {ActionCreator} from "../../store/action";
 
-const MainScreen = ({history, resetStore}) => {
+interface MainScreenProps extends RouteComponentProps {
+  resetStore: () => void;
+}
+
+const MainScreen: React.FC<MainScreenProps> = ({history, resetStore}) => {
   useEffect(() => {
     resetStore();
   }, [resetStore]);
@@ -20,12 +24,7 @@ const MainScreen = ({history, resetStore}) => {
   );
 };
 
-MainScreen.propTypes = {
-  history: PropTypes.object.isRequired,
-  resetStore: PropTypes.func.isRequired
-};
-
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch: any) => ({
   resetStore() {
     dispatch(ActionCreator.resetGameMode());
     dispatch(ActionCreator.resetUserField());

@@ -1,3 +1,5 @@
+import { GameModeType, WinnerType } from "../const";
+
 export const ActionType = {
   CHANGE_GAME_MODE: `CHANGE_GAME_MODE`,
   RESET_USER_SHIPS: `RESET_USER_SHIPS`,
@@ -18,74 +20,79 @@ export const ActionType = {
   UPDATE_OPPONENT_FIELD: `UPDATE_OPPONENT_FIELD`,
   SET_WINNER: `SET_WINNER`,
   RESET_SINGLEPLAYER_SETTINGS: `RESET_SINGLEPLAYER_SETTINGS`
-};
+} as const;
+
+export interface Action {
+  type: string;
+  payload?: any;
+}
 
 export const ActionCreator = {
-  changeGameMode: (mode) => ({
-    type:`CHANGE_GAME_MODE`,
+  changeGameMode: (mode: GameModeType): Action => ({
+    type: `CHANGE_GAME_MODE`,
     payload: mode
   }),
-  resetUserShips: () => ({
+  resetUserShips: (): Action => ({
     type: `RESET_USER_SHIPS`,
   }),
-  resetUserField: () => ({
+  resetUserField: (): Action => ({
     type: `RESET_USER_FIELD`,
   }),
-  resetOpponentShips: () => ({
+  resetOpponentShips: (): Action => ({
     type: `RESET_OPPONENT_SHIPS`,
   }),
-  resetOpponentField: () => ({
+  resetOpponentField: (): Action => ({
     type: `RESET_OPPONENT_FIELD`,
   }),
-  resetGameMode: () => ({
+  resetGameMode: (): Action => ({
     type: `RESET_GAME_MODE`
   }),
-  updateOpponentShips: (newShipsData) => ({
+  updateOpponentShips: (newShipsData: any): Action => ({
     type: `UPDATE_OPPONENT_SHIPS`,
     payload: newShipsData
   }),
-  updateOpponentField: (newField) => ({
+  updateOpponentField: (newField: any): Action => ({
     type: `UPDATE_OPPONENT_FIELD`,
     payload: newField
   }),
-  updateUserField: (newField) => ({
+  updateUserField: (newField: any): Action => ({
     type: `UPDATE_USER_FIELD`,
     payload: newField
   }),
-  updateUserShips: (updatedShipsData) => ({
+  updateUserShips: (updatedShipsData: any): Action => ({
     type: `UPDATE_USER_SHIPS`,
     payload: updatedShipsData
   }),
-  updateShipOnPlace: (newShip) => ({
+  updateShipOnPlace: (newShip: any): Action => ({
     type: `UPDATE_SHIP_ON_PLACE`,
     payload: newShip
   }),
-  updateAllShipPlaced: () => ({
+  updateAllShipPlaced: (): Action => ({
     type: `ALL_SHIPS_PLACED`    
   }),
-  placeShip:  (nextShipData) => ({
+  placeShip: (nextShipData: any): Action => ({
     type: `SHIP_PLACED`,
     payload: nextShipData
   }),
-  generateComputerShips: () => ({
+  generateComputerShips: (): Action => ({
     type: `GENERATE_RANDOM_SHIPS`,
   }),
-  placeComputerShips: (opponentData) => ({
+  placeComputerShips: (opponentData: any): Action => ({
     type: `PLACE_COMPUTER_SHIPS`,
     payload: opponentData
   }),
-  opponentShipPlaced: () => ({
+  opponentShipPlaced: (): Action => ({
     type: `OPPONENT_SHIP_PLACED`
   }),
-  updateSingleplayerGame: (newGameData) => ({
+  updateSingleplayerGame: (newGameData: any): Action => ({
     type: `UPDATE_SINGLEPLAYER_GAME`,
     payload: newGameData
   }),
-  setWinner: (winner) => ({
+  setWinner: (winner: WinnerType): Action => ({
     type: `SET_WINNER`,
     payload: winner
   }),
-  resetSingleplayerGameSettings: () => ({
+  resetSingleplayerGameSettings: (): Action => ({
     type: `RESET_SINGLEPLAYER_SETTINGS`,
   })
 };

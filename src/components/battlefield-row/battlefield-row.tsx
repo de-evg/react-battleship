@@ -1,8 +1,15 @@
 import React from "react";
-import PropTypes from "prop-types";
 import Square from "../square/square";
+import { FieldCell } from "../../utils/fields";
+import { GameModeType } from "../../const";
 
-const BattlefieldRow = ({columnData, isPlayerField, gameMode}) => {
+interface BattlefieldRowProps {
+  columnData: FieldCell[];
+  isPlayerField: boolean;
+  gameMode: GameModeType;
+}
+
+const BattlefieldRow: React.FC<BattlefieldRowProps> = ({columnData, isPlayerField, gameMode}) => {
   return (
     <ul>
       {
@@ -15,12 +22,6 @@ const BattlefieldRow = ({columnData, isPlayerField, gameMode}) => {
       }
     </ul>
   );
-};
-
-BattlefieldRow.propTypes = {
-  columnData: PropTypes.array.isRequired,
-  isPlayerField: PropTypes.bool.isRequired,
-  gameMode: PropTypes.string.isRequired
 };
 
 export default BattlefieldRow;

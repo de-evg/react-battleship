@@ -1,8 +1,8 @@
-import { generateShipList } from "./ships.js";
-import { generateBasicGameFieldData } from "./fields.js";
+import { generateShipList, ShipList } from "./ships";
+import { generateBasicGameFieldData, GameFieldData } from "./fields";
 
-const generateFieldValues = () => {
-  const fieldValues = [];
+const generateFieldValues = (): string[] => {
+  const fieldValues: string[] = [];
   for (let column = 0; column < 10; column++) {
     for (let row = 0; row < 10; row++) {
       fieldValues.push(column.toString() + row.toString());
@@ -11,18 +11,22 @@ const generateFieldValues = () => {
   return fieldValues;
 };
 
-const generateRandomShipList = (shipsData, fieldData, fieldValues) => {
-  const generateRandomOrientation = (shipsData) => {
+const generateRandomShipList = (
+  shipsData: ShipList,
+  fieldData: GameFieldData,
+  fieldValues: string[]
+): ShipList => {
+  const generateRandomOrientation = (shipsData: ShipList): void => {
     Object.keys(shipsData).forEach((shipType) =>
-      shipsData[shipType].map((ship) => {
+      shipsData[shipType as keyof ShipList].map((ship) => {
         ship.isVertical = Math.random() >= 0.5;
         return ship;
       })
     );
   };
 
-  const generateCoords = (shipsData) => {
-    const checkCoordsOnBlock = (coords) => {
+  const generateCoords = (shipsData: ShipList): void => {
+    const checkCoordsOnBlock = (coords: string[]): boolean => {
       const isFieldBlocked = coords.find((coordinate) => {
         const columnNumber = coordinate.slice(0, 1);
         const rowNumber = +coordinate.slice(1);
@@ -31,11 +35,11 @@ const generateRandomShipList = (shipsData, fieldData, fieldValues) => {
       });
       return !!isFieldBlocked;
     };
-    const generateRandomNumber = (min, max) => {
+    const generateRandomNumber = (min: number, max: number): number => {
       return Math.floor(Math.random() * (max - min)) + min;
     };
 
-    const generateShipCoords = (ship, shipType) => {
+    const generateShipCoords = (ship: any, shipType: string): void => {
       generateRandomOrientation(shipsData);
       const deckLength = +shipType.slice(-1);
       const startCoord =
@@ -67,12 +71,12 @@ const generateRandomShipList = (shipsData, fieldData, fieldValues) => {
       }
     };
 
-    const removeBlockedField = (coords) => {
+    const removeBlockedField = (coords: string[]): void => {
       coords.forEach((coord) => {
         let columnNumber = +coord.slice(0, 1);
         let rowNumber = +coord.slice(1);
 
-        let values = [];
+        const values: string[] = [];
         values.push(coord);
         values.push((columnNumber - 1).toString() + rowNumber.toString());
         values.push((columnNumber + 1).toString() + rowNumber.toString());
@@ -96,7 +100,7 @@ const generateRandomShipList = (shipsData, fieldData, fieldValues) => {
     };
 
     Object.keys(shipsData).forEach((shipType) =>
-      shipsData[shipType].map((ship) => {
+      shipsData[shipType as keyof ShipList].map((ship) => {
         let isBlocked = true;
         while (isBlocked) {
           ship.coords = [];
@@ -163,4 +167,5 @@ const generateRandomShipList = (shipsData, fieldData, fieldValues) => {
   return shipsData;
 };
 
-export const generateCompShipList = () => generateRandomShipList(generateShipList(), generateBasicGameFieldData(), generateFieldValues());
+export const generateCompShipList = (): ShipList => 
+  generateRandomShipList(generateShipList(), generateBasicGameFieldData(), generateFieldValues());
