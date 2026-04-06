@@ -1,6 +1,7 @@
 /* eslint-disable default-case */
 
-import { generateCompShipList, ShipList } from "../../../utils/randomShips";
+import { generateCompShipList } from "../../../utils/randomShips";
+import { ShipList } from "../../../utils/ships";
 import { ActionType } from "../../action";
 import { Action } from "../../action";
 

@@ -1,4 +1,3 @@
-import React from "react";
 import {render} from "react-dom";
 import {applyMiddleware, createStore} from "redux";
 import root from "./store/reducers/root";
@@ -10,7 +9,7 @@ import {Provider} from "react-redux";
 const store = createStore(
     root,
     composeWithDevTools(
-        applyMiddleware(thunk.withExtraArgument()))
+        applyMiddleware(thunk))
 );
 
 render(

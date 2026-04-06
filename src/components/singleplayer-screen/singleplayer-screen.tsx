@@ -28,7 +28,7 @@ interface SingleplayerScreenProps extends RouteComponentProps {
   makeAPlayerMove: (move: any) => void;
   opponentShipsData: ShipList | {};
   opponentField: GameFieldData;
-  setWinner: (winner: any) => void;
+  setWinner: (winnerData: {winner: WinnerType | string, isGameOver: boolean}) => void;
 }
 
 const SingleplayerScreen: React.FC<SingleplayerScreenProps> = ({
@@ -249,8 +249,8 @@ const mapDispatchToProps = (dispatch: any) => ({
     dispatch(ActionCreator.updateOpponentField(opponentField));
     dispatch(ActionCreator.updateSingleplayerGame(singleplayerGame));
   },
-  setWinner(winner: any) {
-    dispatch(ActionCreator.setWinner(winner));
+  setWinner(winnerData: {winner: WinnerType | string, isGameOver: boolean}) {
+    dispatch(ActionCreator.setWinner(winnerData));
   },
 });
 

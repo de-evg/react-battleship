@@ -88,9 +88,9 @@ export const ActionCreator = {
     type: `UPDATE_SINGLEPLAYER_GAME`,
     payload: newGameData
   }),
-  setWinner: (winner: WinnerType): Action => ({
+  setWinner: (winnerData: {winner: WinnerType | string, isGameOver: boolean}): Action => ({
     type: `SET_WINNER`,
-    payload: winner
+    payload: winnerData
   }),
   resetSingleplayerGameSettings: (): Action => ({
     type: `RESET_SINGLEPLAYER_SETTINGS`,
