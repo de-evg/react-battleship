@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "5.11.8",
-    "@testing-library/react": "11.2.2",
-    "@testing-library/user-event": "12.6.0",
     "express": "4.17.1",
     "react": "17.0.1",
     "react-dom": "17.0.1",
@@ -24,19 +21,10 @@
     "typecheck": "tsc --noEmit",
     "server": "node server.js"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "devDependencies": {
+    "@testing-library/jest-dom": "5.11.8",
+    "@testing-library/react": "11.2.2",
+    "@testing-library/user-event": "12.6.0",
     "@types/express": "4.17.21",
     "@types/node": "18.19.45",
     "@types/react": "17.0.62",
