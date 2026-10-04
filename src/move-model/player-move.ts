@@ -33,12 +33,14 @@ export const generatePlayerMove = (
     };
 
     const onHit = (): void => {
-      const shipType = newOpponentFieldData["column" + columnNumber][
-        rowNumber
-      ].shipID!.slice(0, 1);
-      const shipNumber = newOpponentFieldData["column" + columnNumber][
-        rowNumber
-      ].shipID!.slice(-1);
+      const shipID = newOpponentFieldData["column" + columnNumber][rowNumber].shipID;
+
+      if (shipID === null) {
+        return;
+      }
+
+      const shipType = shipID.slice(0, 1);
+      const shipNumber = shipID.slice(-1);
       const shipOnFire = newShipsData["deck" + shipType as keyof ShipList][parseInt(shipNumber)];
 
       const updateShipsOnHit = (): void => {
@@ -55,8 +57,8 @@ export const generatePlayerMove = (
         newOpponentFieldData["column" + columnNumber][rowNumber].isHit = true;
         if (shipOnFire.isDestroyed) {
           shipOnFire.coords.forEach((coord) => {
-            let columnNumber = +coord.slice(0, 1);
-            let rowNumber = +coord.slice(-1);
+            const columnNumber = +coord.slice(0, 1);
+            const rowNumber = +coord.slice(-1);
             newOpponentFieldData["column" + columnNumber][
               rowNumber
             ].isDestroyed = true;

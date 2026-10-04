@@ -52,13 +52,14 @@ export const generateComputerMove = (
     const row = parseInt(aimNumber[0].slice(1));
 
     const onHit = (): void => {
-      const shipType = nextPlayerField["column" + column][row].shipID!.slice(
-        0,
-        1
-      );
-      const shipNumber = nextPlayerField["column" + column][row].shipID!.slice(
-        -1
-      );
+      const shipID = nextPlayerField["column" + column][row].shipID;
+
+      if (shipID === null) {
+        return;
+      }
+
+      const shipType = shipID.slice(0, 1);
+      const shipNumber = shipID.slice(-1);
       const shipOnFire = shipsData["deck" + shipType as keyof ShipList][parseInt(shipNumber)];
 
       const updateShipsData = (): void => {
@@ -74,8 +75,8 @@ export const generateComputerMove = (
         if (shipOnFire.isDestroyed) {
           const splitedElements: string[][] = [];
           shipOnFire.coords.forEach((coord) => {
-            let columnNumber = coord.slice(0, 1);
-            let rowNumber = parseInt(coord.slice(-1));
+            const columnNumber = coord.slice(0, 1);
+            const rowNumber = parseInt(coord.slice(-1));
             nextPlayerField["column" + columnNumber][
               rowNumber
             ].isDestroyed = true;
@@ -395,7 +396,7 @@ export const generateComputerMove = (
     }
 
     const intendedAimCoords = gameData.intendedAims[direction];
-    let intendedCoord = intendedAimCoords.splice(0, 1)[0];
+    const intendedCoord = intendedAimCoords.splice(0, 1)[0];
     const aimIndex = nextAimList.findIndex((aim) => intendedCoord === aim);
     shot(aimIndex);
   };

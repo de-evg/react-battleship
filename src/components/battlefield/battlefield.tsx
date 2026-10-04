@@ -5,9 +5,9 @@ import { GameModeType } from "../../const";
 
 interface BattlefieldProps {
   fieldsData: GameFieldData;
-  onMouseOverHandler: (e: React.MouseEvent) => void;
-  onMouseOutHandler: (e: React.MouseEvent) => void;
-  onWheelRotateHandler: (e: React.WheelEvent) => void;
+  onMouseOverHandler?: (e: React.MouseEvent) => void;
+  onMouseOutHandler?: (e: React.MouseEvent) => void;
+  onWheelRotateHandler?: (e: React.WheelEvent) => void;
   onBattlefieldClickHandler: (e: React.MouseEvent) => void;
   isPlayerField: boolean;
   gameMode: GameModeType;

@@ -44,8 +44,8 @@ const generateRandomShipList = (
       const deckLength = +shipType.slice(-1);
       const startCoord =
         fieldValues[generateRandomNumber(0, fieldValues.length)];
-      let columnNumber = +startCoord.slice(0, 1);
-      let rowNumber = +startCoord.slice(1);
+      const columnNumber = +startCoord.slice(0, 1);
+      const rowNumber = +startCoord.slice(1);
 
       ship.coords.push(startCoord);
       if (ship.isVertical) {

@@ -14,7 +14,7 @@
 | Сборка | Vite 5.4.2 + `@vitejs/plugin-react` 4.3.1 |
 | Типы | TypeScript 4.9.5 (`strict: true`, `any` в `src` отсутствует) |
 | Тесты | Jest 26.6.3 — 5 наборов, 25 тестов, все проходят |
-| Линт | ESLint 7.17.0 (TypeScript пока не разбирает, см. §10) |
+| Линт | ESLint 7.17.0 + @typescript-eslint 5.62.0, `npm run lint` проходит без замечаний |
 | Размер кода | 2638 строк TS/TSX в 31 файле `src/` |
 
 ---
@@ -26,7 +26,7 @@ react-battleship/
 ├── index.html                    # HTML-точка входа Vite → /src/index.tsx
 ├── vite.config.ts                # Vite: порт 3000, outDir "build", sourcemap
 ├── tsconfig.json                 # strict, jsx: react-jsx, moduleResolution: node
-├── package.json                  # dev / build / preview / test / typecheck / server
+├── package.json                  # dev / build / preview / test / lint / typecheck / server
 ├── server.js                     # Express: статика из build/, порт 8080
 ├── jest.config.js                # Jest: jsdom, тесты в src, трансформер на TS
 ├── jest.transformer.js           # Трансформер Jest на базе установленного TypeScript
@@ -242,6 +242,7 @@ interface FieldCell {
 | `npm run build` | Сборка в `build/` с sourcemap |
 | `npm run preview` | Предпросмотр собранной версии |
 | `npm test` | Jest: 5 наборов, 25 тестов |
+| `npm run lint` | ESLint по `src` |
 | `npm run typecheck` | `tsc --noEmit` |
 | `node server.js` / `npm run server` | Express на порту **8080** (`PORT` из окружения): отдаёт `build/` и статику корня, `GET /ping` → `pong`, всё остальное → `build/index.html` |
 
@@ -266,14 +267,23 @@ interface FieldCell {
 
 В исходном `computer-move.ts` в ветке для правого нижнего угла (9;9) вместо `rowDown` уменьшался `rowUp`, из-за чего ИИ трижды предлагал одну и ту же клетку вместо трёх разных. Это подтверждено дифференциальным тестом: расхождения с оригиналом ровно в `99 deck3` и `99 deck4` (у 1- и 2-палубных кораблей обход делает меньше двух шагов, поэтому дубликат не проявляется). Исправлено рефакторингом.
 
+### Дополнительно (после восстановления работы)
+
+| Изменение | Результат |
+| --- | --- |
+| ESLint не разбирал TypeScript | Установлены `@typescript-eslint/parser` и `@typescript-eslint/eslint-plugin` 5.62.0 (совместимы с ESLint 7 и TypeScript 4.9), добавлен скрипт `npm run lint`. Линт проходит без ошибок и предупреждений |
+| Неиспользуемые зависимости | Удалены `prop-types` и `web-vitals`; `prop-types` остаётся транзитивной зависимостью `react-redux` и `react-router-dom` |
+| Тип `{}` | Заменён на `Record<string, never>` через `EmptyObject`, `ShipOnPlace` и `OpponentShipsData` |
+| Пустые обработчики в `Battlefield` | Три обработчика стали необязательными, `OpponentField` их больше не передаёт |
+| Утверждения `shipID!` | Заменены явной проверкой на `null` |
+| Смешанные переводы строк | Добавлен `.gitattributes` с `* text=auto eol=lf` |
+
 ---
 
 ## 9. Что осталось
 
-* **Линт TypeScript не работает.** ESLint 7 не разбирает `.ts`/`.tsx` без `@typescript-eslint/parser`; его нет в `node_modules`, а установка в этой песочнице невозможна. Конфиг готов — нужно добавить `@typescript-eslint/parser` и `@typescript-eslint/eslint-plugin`.
-* `prop-types` (15.7.2) и `web-vitals` (0.2.4) в зависимостях не используются — можно удалить.
-* `browserslist` в `package.json` для Vite не применяется (Vite использует `build.target`).
-* В репозитории нет `.gitattributes`, поэтому git предупреждает о замене LF на CRLF при выгрузке.
+* `browserslist` в `package.json` для Vite не применяется: сборщик использует `build.target`.
+* Пакеты `@testing-library/*` подключены, но тестов на компоненты нет — покрыта только логика.
 * Реализован только одиночный режим; сетевой игры нет.
 
 ---

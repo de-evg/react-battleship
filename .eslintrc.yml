@@ -1,3 +1,5 @@
+root: true
+
 env:
   es6: true
   browser: true
@@ -8,6 +10,9 @@ extends:
   - eslint:recommended
   - plugin:react/recommended
   - plugin:react-hooks/recommended
+  - plugin:@typescript-eslint/recommended
+
+parser: "@typescript-eslint/parser"
 
 parserOptions:
   ecmaFeatures:
@@ -17,10 +22,17 @@ parserOptions:
 
 plugins:
   - react
+  - "@typescript-eslint"
 
 settings:
   react:
     version: detect
+
+rules:
+  # Типы описывает TypeScript, поэтому prop-types в проекте не нужны.
+  react/prop-types: off
+  # Проект собирается с новым JSX-трансформом React 17, импорт React не обязателен.
+  react/react-in-jsx-scope: off
 
 ignorePatterns:
   - build/

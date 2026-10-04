@@ -30,6 +30,7 @@ npm run dev          # http://localhost:3000
 | `npm run build` | Продакшен-сборка в `build/` (с sourcemap) |
 | `npm run preview` | Предпросмотр собранной версии |
 | `npm test` | Тесты Jest |
+| `npm run lint` | ESLint по каталогу `src` |
 | `npm run typecheck` | Проверка типов без эмита (`tsc --noEmit`) |
 | `npm run server` | Express на порту **8080** (или `PORT`): отдаёт `build/`, `GET /ping` → `pong`, остальное → `build/index.html` |
 
@@ -76,6 +77,6 @@ npm test
 
 ## Известные ограничения
 
-* **Линт TypeScript не работает.** ESLint 7 не разбирает `.ts`/`.tsx` без `@typescript-eslint/parser`, которого нет в зависимостях. Конфиг в `.eslintrc.yml` готов, но для запуска линта нужно добавить `@typescript-eslint/parser` и `@typescript-eslint/eslint-plugin`.
 * Реализован только одиночный режим; сетевой игры нет.
-* `prop-types` и `web-vitals` в зависимостях не используются.
+* Пакеты `@testing-library/*` подключены, но тестов на компоненты пока нет — покрыта только логика.
+* `browserslist` в `package.json` для Vite не применяется: сборщик использует `build.target`.

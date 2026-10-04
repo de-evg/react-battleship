@@ -1,12 +1,11 @@
 /* eslint-disable default-case */
 
 import { generateCompShipList } from "../../../utils/randomShips";
-import { ShipList } from "../../../utils/ships";
 import { ActionType } from "../../action";
-import { Action } from "../../action";
+import { Action, OpponentShipsData } from "../../action";
 
 export interface OpponentShipsState {
-  opponentShipsData: ShipList | {};
+  opponentShipsData: OpponentShipsData;
 }
 
 const initialState: OpponentShipsState = {

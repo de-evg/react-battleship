@@ -14,7 +14,7 @@ import { GameFieldData } from "../../utils/fields";
 import { ShipList } from "../../utils/ships";
 import { SingleplayerGameState } from "../../store/reducers/singleplayer-game/singleplayer-game";
 import type { RootState } from "../../store/reducers/root";
-import type { Action, ShipOnPlace, WinnerPayload } from "../../store/action";
+import type { Action, OpponentShipsData, ShipOnPlace, WinnerPayload } from "../../store/action";
 import type { ComputerMoveResult } from "../../move-model/computer-move";
 import type { PlayerMoveResult } from "../../move-model/player-move";
 import type { Dispatch } from "redux";
@@ -31,7 +31,7 @@ interface SingleplayerScreenProps extends RouteComponentProps {
   playerField: GameFieldData;
   makeAComputerMove: (move: ComputerMoveResult) => void;
   makeAPlayerMove: (move: PlayerMoveResult) => void;
-  opponentShipsData: ShipList | {};
+  opponentShipsData: OpponentShipsData;
   opponentField: GameFieldData;
   setWinner: (winnerData: WinnerPayload) => void;
 }

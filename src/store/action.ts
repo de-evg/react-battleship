@@ -25,8 +25,14 @@ export const ActionType = {
   RESET_SINGLEPLAYER_SETTINGS: `RESET_SINGLEPLAYER_SETTINGS`,
 } as const;
 
-/** Корабль, который игрок ставит на поле. Пока корабль не выбран — пустой объект. */
-export type ShipOnPlace = Ship | {};
+/** Пустая заготовка вместо отсутствующих данных: заменяет запрещённый правилами тип `{}`. */
+export type EmptyObject = Record<string, never>;
+
+/** Корабль, который игрок ставит на поле. Пока корабль не выбран — пустая заготовка. */
+export type ShipOnPlace = Ship | EmptyObject;
+
+/** Корабли противника: расставленный флот либо пустая заготовка до генерации. */
+export type OpponentShipsData = ShipList | EmptyObject;
 
 export interface PlaceShipPayload {
   shipTypeOnPlace: number;
@@ -66,7 +72,7 @@ export type Action =
   | { type: typeof ActionType.OPPONENT_SHIP_PLACED }
   | { type: typeof ActionType.UPDATE_USER_SHIPS; payload: ShipList }
   | { type: typeof ActionType.UPDATE_SINGLEPLAYER_GAME; payload: Partial<SingleplayerGameState> }
-  | { type: typeof ActionType.UPDATE_OPPONENT_SHIPS; payload: ShipList | {} }
+  | { type: typeof ActionType.UPDATE_OPPONENT_SHIPS; payload: OpponentShipsData }
   | { type: typeof ActionType.UPDATE_OPPONENT_FIELD; payload: GameFieldData }
   | { type: typeof ActionType.SET_WINNER; payload: WinnerPayload }
   | { type: typeof ActionType.RESET_SINGLEPLAYER_SETTINGS };
@@ -91,7 +97,7 @@ export const ActionCreator = {
   resetGameMode: (): Action => ({
     type: ActionType.RESET_GAME_MODE,
   }),
-  updateOpponentShips: (newShipsData: ShipList | {}): Action => ({
+  updateOpponentShips: (newShipsData: OpponentShipsData): Action => ({
     type: ActionType.UPDATE_OPPONENT_SHIPS,
     payload: newShipsData,
   }),

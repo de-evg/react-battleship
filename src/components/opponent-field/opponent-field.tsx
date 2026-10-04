@@ -5,7 +5,7 @@ import type {RootState} from "../../store/reducers/root";
 import Battlefield from "../battlefield/battlefield";
 import {GameMode} from "../../const";
 import {ActionCreator} from "../../store/action";
-import type {Action} from "../../store/action";
+import type {Action, OpponentShipsData} from "../../store/action";
 import type {Dispatch} from "redux";
 import { GameFieldData } from "../../utils/fields";
 import { ShipList } from "../../utils/ships";
@@ -18,7 +18,7 @@ const IS_PLAYER_FIELD = false;
 interface OpponentFieldProps {
   gameMode: GameModeType;
   opponentField: GameFieldData;
-  opponentShipsData: ShipList | {};
+  opponentShipsData: OpponentShipsData;
   generateRandomShips: () => void;
   placeShips: (fieldsData: GameFieldData, shipsData: ShipList) => void;
   opponentShipsPlaced: boolean;
@@ -48,11 +48,8 @@ const OpponentField: React.FC<OpponentFieldProps> = ({gameMode, opponentField, o
             ROW_NUMBERS.map((item, i) => <li key={i} className={"square"}>{i + 1}</li>)
           }
         </ul>
-        <Battlefield          
+        <Battlefield
           fieldsData={opponentField}
-          onMouseOverHandler={() => {}}
-          onMouseOutHandler={() => {}}
-          onWheelRotateHandler={() => {}}          
           onBattlefieldClickHandler={onBattlefieldClickHandler}
           isPlayerField={IS_PLAYER_FIELD}
           gameMode={gameMode}

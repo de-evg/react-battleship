@@ -1,5 +1,5 @@
 /* eslint-disable default-case */
-import { ActionCreator, ActionType, Action } from "../../action";
+import { ActionType, Action } from "../../action";
 import { WinnerType } from "../../../const";
 
 interface IntendedAims {
