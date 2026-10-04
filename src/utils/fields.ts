@@ -1,3 +1,5 @@
+import { Ship, ShipList } from "./ships";
+
 export interface FieldCell {
   id: string;
   isShip: boolean;
@@ -31,6 +33,17 @@ export const generateBasicGameFieldData = (): GameFieldData => {
   return basicGameFieldData;
 };
 
+/** Полная копия поля: клетки — вложенные объекты, поверхностного копирования мало. */
+export const cloneGameFieldData = (fieldData: GameFieldData): GameFieldData => {
+  const clonedFieldData: GameFieldData = {};
+
+  Object.keys(fieldData).forEach((columnName) => {
+    clonedFieldData[columnName] = fieldData[columnName].map((cell) => ({ ...cell }));
+  });
+
+  return clonedFieldData;
+};
+
 export const checkCoordsOnBlock = (coords: string[], fields: GameFieldData): boolean => {
   let coordIsBlocked = true;
   if (!coords.length) {    
@@ -44,10 +57,10 @@ export const checkCoordsOnBlock = (coords: string[], fields: GameFieldData): boo
   return coordIsBlocked;
 };
 
-export const placeComputerShips = (fieldsData: GameFieldData, shipsData: any): GameFieldData => {
-  const newFieldsData = {...fieldsData};
+export const placeComputerShips = (fieldsData: GameFieldData, shipsData: ShipList): GameFieldData => {
+  const newFieldsData = cloneGameFieldData(fieldsData);
   Object.keys(shipsData).forEach((shipType) =>
-    shipsData[shipType].forEach((ship: any) => {
+    shipsData[shipType as keyof ShipList].forEach((ship: Ship) => {
       ship.coords.map((coord: string) => {
         const columnNumber = coord.slice(0, 1);
         const rowNumber = parseInt(coord.slice(1));

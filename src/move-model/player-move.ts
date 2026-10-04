@@ -1,21 +1,22 @@
-import { GameFieldData } from "../utils/fields";
-import { ShipList } from "../utils/ships";
+import { cloneGameFieldData, GameFieldData } from "../utils/fields";
+import { cloneShipList, ShipList } from "../utils/ships";
+import { SingleplayerGameState } from "../store/reducers/singleplayer-game/singleplayer-game";
 
-interface PlayerMoveResult {
+export interface PlayerMoveResult {
   opponentShipsData: ShipList;
   opponentField: GameFieldData;
-  singleplayerGame: any;
+  singleplayerGame: SingleplayerGameState;
 }
 
 export const generatePlayerMove = (
   target: { id: string },
   opponentFieldData: GameFieldData,
   shipsData: ShipList,
-  gameData: any
+  gameData: SingleplayerGameState
 ): PlayerMoveResult | undefined => {
-  const newOpponentFieldData = { ...opponentFieldData };
+  const newOpponentFieldData = cloneGameFieldData(opponentFieldData);
   const newGameData = { ...gameData };
-  const newShipsData = { ...shipsData };
+  const newShipsData = cloneShipList(shipsData);
   if (
     !newOpponentFieldData["column" + target.id.slice(0, 1)][parseInt(target.id.slice(-1))]
       .isHit ||

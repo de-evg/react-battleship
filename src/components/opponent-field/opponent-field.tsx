@@ -1,9 +1,12 @@
 import React, {useEffect} from "react";
 import {connect} from "react-redux";
 import {NameSpace} from "../../store/reducers/root";
+import type {RootState} from "../../store/reducers/root";
 import Battlefield from "../battlefield/battlefield";
 import {GameMode} from "../../const";
 import {ActionCreator} from "../../store/action";
+import type {Action} from "../../store/action";
+import type {Dispatch} from "redux";
 import { GameFieldData } from "../../utils/fields";
 import { ShipList } from "../../utils/ships";
 import { GameModeType } from "../../const";
@@ -59,14 +62,14 @@ const OpponentField: React.FC<OpponentFieldProps> = ({gameMode, opponentField, o
   );
 };
 
-const mapStateToProps = (state: any) => ({  
+const mapStateToProps = (state: RootState) => ({  
   opponentShipsData: state[NameSpace.OPPONENT_SHIPS].opponentShipsData,
   opponentField: state[NameSpace.OPPONENT_FIELD].opponentField,
   gameMode: state[NameSpace.GAME_MODE].gameMode,
   opponentShipsPlaced: state[NameSpace.OPPONENT_FIELD].opponentShipsPlaced
 });
 
-const mapDispatchToProps = (dispatch: any) => ({
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => ({
   generateRandomShips() {
     dispatch(ActionCreator.generateComputerShips());
     

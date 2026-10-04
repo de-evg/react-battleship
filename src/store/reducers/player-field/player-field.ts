@@ -3,7 +3,7 @@ import { generateBasicGameFieldData, GameFieldData } from "../../../utils/fields
 import { ActionType } from "../../action";
 import { Action } from "../../action";
 
-interface PlayerFieldState {
+export interface PlayerFieldState {
   playerField: GameFieldData;
 }
 

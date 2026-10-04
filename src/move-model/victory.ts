@@ -1,5 +1,5 @@
 import { Winner, WinnerType } from "../const";
-import { ShipList } from "../utils/ships";
+import { Ship, ShipList } from "../utils/ships";
 
 interface GameOverResult {
   isGameOver: boolean;
@@ -8,7 +8,7 @@ interface GameOverResult {
 
 const checkOnDestroyedShips = (shipsData: ShipList): boolean => {
   const shipsTypes = Object.keys(shipsData);
-  let survivingShips: any[] = [];
+  let survivingShips: Ship[] = [];
   shipsTypes.forEach((type) => {
       const ships = shipsData[type as keyof ShipList].filter((ship) => !ship.isDestroyed);
       survivingShips = survivingShips.concat(ships);

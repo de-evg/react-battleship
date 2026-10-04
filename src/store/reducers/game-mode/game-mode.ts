@@ -3,7 +3,7 @@ import { Action } from "../../action";
 import { ActionType } from "../../action";
 import { GameMode, GameModeType } from "../../../const";
 
-interface GameModeState {
+export interface GameModeState {
   gameMode: GameModeType;
 }
 

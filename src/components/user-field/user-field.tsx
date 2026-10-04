@@ -1,25 +1,32 @@
 import React, { useCallback } from "react";
 import { connect } from "react-redux";
 import { NameSpace } from "../../store/reducers/root";
+import type { RootState } from "../../store/reducers/root";
 import Battlefield from "../battlefield/battlefield";
 import { GameMode } from "../../const";
 import { ActionCreator } from "../../store/action";
-import { checkCoordsOnBlock, GameFieldData } from "../../utils/fields";
-import { ShipList, Ship } from "../../utils/ships";
+import type { Action, PlaceShipRequest, ShipOnPlace } from "../../store/action";
+import type { Dispatch } from "redux";
+import { checkCoordsOnBlock, cloneGameFieldData, GameFieldData } from "../../utils/fields";
+import { cloneShipList, ShipList, Ship } from "../../utils/ships";
 import { GameModeType } from "../../const";
 
 const COLUMN_LETTERS = ["", "А", "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К"];
 const ROW_NUMBERS = Array(10).fill(null);
 const IS_PLAYER_FIELD = true;
 
+/** Отличает уже выбранный корабль от пустого объекта-заглушки в состоянии. */
+const isShipOnPlace = (value: ShipOnPlace): value is Ship =>
+  `id` in value && `coords` in value;
+
 interface UserFieldProps {
   playerField: GameFieldData;
   playerShipsData: ShipList;
-  currentShipOnPlace: Ship | {};
+  currentShipOnPlace: ShipOnPlace;
   updateDataOnMouseOut: (newCurrentShip: Ship, newFields: GameFieldData) => void;
   gameMode: GameModeType;
   updateUserFiled: (newFields: GameFieldData) => void;
-  placeCurrentShip: (nextShipData: any) => void;
+  placeCurrentShip: (nextShipData: PlaceShipRequest) => void;
   shipTypeOnPlace: number;
   isAllShipPlaced: boolean;
 }
@@ -37,7 +44,7 @@ const UserField: React.FC<UserFieldProps> = ({
 }) => {
   const handleMouseOver = useCallback(
     (evtOver: React.MouseEvent) => {
-      if (gameMode === GameMode.ARRAGMENT && !isAllShipPlaced && currentShipOnPlace && 'id' in currentShipOnPlace) {
+      if (gameMode === GameMode.ARRAGMENT && !isAllShipPlaced && isShipOnPlace(currentShipOnPlace)) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
         newCurrentShipOnPlace.coords = [];
 
@@ -77,7 +84,7 @@ const UserField: React.FC<UserFieldProps> = ({
         );
 
         if (!isCoordsBloked) {
-          const newFieldsData = { ...playerField };
+          const newFieldsData = cloneGameFieldData(playerField);
           newCurrentShipOnPlace.coords.forEach((coord) => {
             newFieldsData["column" + coord.slice(0, 1)][
               parseInt(coord.slice(1))
@@ -100,12 +107,12 @@ const UserField: React.FC<UserFieldProps> = ({
     (evtOut: React.MouseEvent) => {
       if (
         gameMode === GameMode.ARRAGMENT &&
-        currentShipOnPlace && 'coords' in currentShipOnPlace &&
+        isShipOnPlace(currentShipOnPlace) &&
         !isAllShipPlaced &&
         !(evtOut.target as HTMLElement).classList.contains(".ship")
       ) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
-        const newFieldsData = { ...playerField };
+        const newFieldsData = cloneGameFieldData(playerField);
 
         if (!checkCoordsOnBlock(newCurrentShipOnPlace.coords, newFieldsData)) {
           newCurrentShipOnPlace.coords.forEach((coord) => {
@@ -138,7 +145,7 @@ const UserField: React.FC<UserFieldProps> = ({
         gameMode === GameMode.ARRAGMENT &&
         (evt.target as HTMLElement).tagName === "LI" &&
         !isAllShipPlaced &&
-        currentShipOnPlace && 'coords' in currentShipOnPlace &&
+        isShipOnPlace(currentShipOnPlace) &&
         !checkCoordsOnBlock(currentShipOnPlace.coords, playerField)
       ) {
         const shipType = "deck" + currentShipOnPlace.id.slice(0, 1);
@@ -146,10 +153,10 @@ const UserField: React.FC<UserFieldProps> = ({
 
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
         newCurrentShipOnPlace.isPlaced = true;
-        const currentShipsData = { ...playerShipsData };
+        const currentShipsData = cloneShipList(playerShipsData);
         currentShipsData[shipType as keyof ShipList][shipNumber] = newCurrentShipOnPlace;
 
-        const newFieldsData = { ...playerField };
+        const newFieldsData = cloneGameFieldData(playerField);
         newCurrentShipOnPlace.coords.forEach((coord) => {
           newFieldsData["column" + coord.slice(0, 1)][
             parseInt(coord.slice(1))
@@ -220,7 +227,7 @@ const UserField: React.FC<UserFieldProps> = ({
 
         placeCurrentShip({
           shipTypeOnPlace: nextShipTypeOnPlace,
-          currentShipOnPlace: nextShipOnPlaced,
+          currentShipOnPlace: nextShipOnPlaced ?? {},
           playerField: newFieldsData,
           playerShipsData: currentShipsData,
           isAllShipPlaced: isArrigementOver,
@@ -240,9 +247,9 @@ const UserField: React.FC<UserFieldProps> = ({
 
   const handleRotate = useCallback(
     (evt: React.WheelEvent) => {
-      if (gameMode === GameMode.ARRAGMENT && currentShipOnPlace && 'id' in currentShipOnPlace) {
+      if (gameMode === GameMode.ARRAGMENT && isShipOnPlace(currentShipOnPlace)) {
         const newCurrentShipOnPlace = { ...currentShipOnPlace };
-        const newFieldsData = { ...playerField };
+        const newFieldsData = cloneGameFieldData(playerField);
 
         newCurrentShipOnPlace.isVertical = !newCurrentShipOnPlace.isVertical;
 
@@ -333,7 +340,7 @@ const UserField: React.FC<UserFieldProps> = ({
   );
 };
 
-const mapStateToProps = (state: any) => ({
+const mapStateToProps = (state: RootState) => ({
   playerShipsData: state[NameSpace.PLAYER_SHIPS].playerShipsData,
   playerField: state[NameSpace.PLAYER_FIELD].playerField,
   currentShipOnPlace: state[NameSpace.PLAYER_SHIPS].currentShipOnPlace,
@@ -342,7 +349,7 @@ const mapStateToProps = (state: any) => ({
   isAllShipPlaced: state[NameSpace.PLAYER_SHIPS].isAllShipPlaced,
 });
 
-const mapDispatchToProps = (dispatch: any) => ({
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => ({
   updateDataOnMouseOut(newCurrentShip: Ship, newFields: GameFieldData) {
     dispatch(ActionCreator.updateShipOnPlace(newCurrentShip));
     dispatch(ActionCreator.updateUserField(newFields));
@@ -350,7 +357,7 @@ const mapDispatchToProps = (dispatch: any) => ({
   updateUserFiled(newFields: GameFieldData) {
     dispatch(ActionCreator.updateUserField(newFields));
   },
-  placeCurrentShip(nextShipData: any) {
+  placeCurrentShip(nextShipData: PlaceShipRequest) {
     dispatch(
       ActionCreator.placeShip({
         shipTypeOnPlace: nextShipData.shipTypeOnPlace,

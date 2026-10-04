@@ -9,26 +9,31 @@ import { ActionCreator } from "../../store/action";
 import { generateComputerMove } from "../../move-model/computer-move";
 import { generatePlayerMove } from "../../move-model/player-move";
 import { checkOnGameOver } from "../../move-model/victory";
-import { GameModeType, WinnerType } from "../../const";
+import { GameModeType } from "../../const";
 import { GameFieldData } from "../../utils/fields";
 import { ShipList } from "../../utils/ships";
 import { SingleplayerGameState } from "../../store/reducers/singleplayer-game/singleplayer-game";
+import type { RootState } from "../../store/reducers/root";
+import type { Action, ShipOnPlace, WinnerPayload } from "../../store/action";
+import type { ComputerMoveResult } from "../../move-model/computer-move";
+import type { PlayerMoveResult } from "../../move-model/player-move";
+import type { Dispatch } from "redux";
 
 interface SingleplayerScreenProps extends RouteComponentProps {
   gameMode: GameModeType;
   updateGameMode: (mode: GameModeType) => void;
-  setShipOnPlace: (newShip: any) => void;
+  setShipOnPlace: (newShip: ShipOnPlace) => void;
   shipTypeOnPlace: number;
   playerShipsData: ShipList;
   resetGame: () => void;
   isAllShipPlaced: boolean;
   singleplayerGame: SingleplayerGameState;
   playerField: GameFieldData;
-  makeAComputerMove: (move: any) => void;
-  makeAPlayerMove: (move: any) => void;
+  makeAComputerMove: (move: ComputerMoveResult) => void;
+  makeAPlayerMove: (move: PlayerMoveResult) => void;
   opponentShipsData: ShipList | {};
   opponentField: GameFieldData;
-  setWinner: (winnerData: {winner: WinnerType | string, isGameOver: boolean}) => void;
+  setWinner: (winnerData: WinnerPayload) => void;
 }
 
 const SingleplayerScreen: React.FC<SingleplayerScreenProps> = ({
@@ -70,7 +75,7 @@ const SingleplayerScreen: React.FC<SingleplayerScreenProps> = ({
       updateGameMode(GameMode.SINGLE_SHIPS_READY);
     }
 
-    let delay: NodeJS.Timeout | undefined;
+    let delay: ReturnType<typeof setTimeout> | undefined;
     if (gameMode === GameMode.GAME && (!isPlayerMove || isReplayMove)) {
       delay = setTimeout(() => setCompMove(true), 700);
     }
@@ -212,7 +217,7 @@ const SingleplayerScreen: React.FC<SingleplayerScreenProps> = ({
   );
 };
 
-const mapStateToProps = (state: any) => ({
+const mapStateToProps = (state: RootState) => ({
   gameMode: state[NameSpace.GAME_MODE].gameMode,
   shipTypeOnPlace: state[NameSpace.PLAYER_SHIPS].shipTypeOnPlace,
   playerShipsData: state[NameSpace.PLAYER_SHIPS].playerShipsData,
@@ -223,11 +228,11 @@ const mapStateToProps = (state: any) => ({
   opponentShipsData: state[NameSpace.OPPONENT_SHIPS].opponentShipsData,
 });
 
-const mapDispatchToProps = (dispatch: any) => ({
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => ({
   updateGameMode(mode: GameModeType) {
     dispatch(ActionCreator.changeGameMode(mode));
   },
-  setShipOnPlace(newShip: any) {
+  setShipOnPlace(newShip: ShipOnPlace) {
     dispatch(ActionCreator.updateShipOnPlace(newShip));
   },
   resetGame() {
@@ -239,17 +244,17 @@ const mapDispatchToProps = (dispatch: any) => ({
     dispatch(ActionCreator.setWinner({winner: ``, isGameOver: false}));
     dispatch(ActionCreator.resetSingleplayerGameSettings());
   },
-  makeAComputerMove({ playerShipsData, playerField, singleplayerGame }: any) {
+  makeAComputerMove({ playerShipsData, playerField, singleplayerGame }: ComputerMoveResult) {
     dispatch(ActionCreator.updateUserShips(playerShipsData));
     dispatch(ActionCreator.updateUserField(playerField));
     dispatch(ActionCreator.updateSingleplayerGame(singleplayerGame));
   },
-  makeAPlayerMove({ opponentShipsData, opponentField, singleplayerGame }: any) {
+  makeAPlayerMove({ opponentShipsData, opponentField, singleplayerGame }: PlayerMoveResult) {
     dispatch(ActionCreator.updateOpponentShips(opponentShipsData));
     dispatch(ActionCreator.updateOpponentField(opponentField));
     dispatch(ActionCreator.updateSingleplayerGame(singleplayerGame));
   },
-  setWinner(winnerData: {winner: WinnerType | string, isGameOver: boolean}) {
+  setWinner(winnerData: WinnerPayload) {
     dispatch(ActionCreator.setWinner(winnerData));
   },
 });

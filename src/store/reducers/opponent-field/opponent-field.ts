@@ -7,7 +7,7 @@ import {
 import { ActionType } from "../../action";
 import { Action } from "../../action";
 
-interface OpponentFieldState {
+export interface OpponentFieldState {
   opponentField: GameFieldData;
   opponentShipsPlaced: boolean;
 }

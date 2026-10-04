@@ -1,70 +1,81 @@
-# Getting Started with Create React App
+# Морской бой
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Браузерная игра «Морской бой»: одиночная партия против компьютера на поле 10×10.
+Написана на React + Redux + TypeScript, собирается Vite, раздаётся Express.
 
-## Available Scripts
+## Стек
 
-In the project directory, you can run:
+| Слой | Технология |
+| --- | --- |
+| UI | React 17, хуки, `react-router-dom` 5 |
+| Состояние | Redux 4 + `react-redux` 7 + `redux-thunk` |
+| Язык | TypeScript 4.9 (`strict: true`) |
+| Сборка | Vite 5 |
+| Тесты | Jest 26 + `@testing-library/*` |
+| Сервер | Express 4 |
+| Линт | ESLint 7 (см. «Известные ограничения») |
 
-### `npm start`
+## Быстрый старт
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```bash
+npm install
+npm run dev          # http://localhost:3000
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Скрипты
 
-### `npm test`
+| Команда | Что делает |
+| --- | --- |
+| `npm run dev` | Dev-сервер Vite на порту **3000** |
+| `npm run build` | Продакшен-сборка в `build/` (с sourcemap) |
+| `npm run preview` | Предпросмотр собранной версии |
+| `npm test` | Тесты Jest |
+| `npm run typecheck` | Проверка типов без эмита (`tsc --noEmit`) |
+| `npm run server` | Express на порту **8080** (или `PORT`): отдаёт `build/`, `GET /ping` → `pong`, остальное → `build/index.html` |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Сборка и сервер работают в паре: `npm run build && npm run server`.
 
-### `npm run build`
+## Как играть
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Главное меню** (`/`) — кнопка «Начать игру» ведёт на `/single` и сбрасывает прошлую партию.
+2. **Расстановка** — «Разместить корабли», затем расставляйте флот мышью: наведение показывает корабль, колесо мыши поворачивает его, клик ставит. Флот противника генерируется случайно.
+3. **Бой** — «Начать игру». Клик по полю противника — выстрел. При промахе ход переходит компьютеру, при попадании вы стреляете снова.
+4. **Финал** — партия заканчивается, когда уничтожен весь флот одной из сторон.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Фазы партии заданы в `GameMode`: `IN_MENU` → `SINGLE_ON_START` → `ARRAGMENT` → `SINGLE_SHIPS_READY` → `GAME` → `GAME_OVER`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Устройство
 
-### `npm run eject`
+```
+src/
+├── components/   представление: экраны, поля, сетка 10×10
+├── move-model/   логика ходов: игрок, компьютер, условие победы
+├── store/        Redux: 19 экшенов и 6 редьюсеров
+└── utils/        модели данных: поле, корабли, случайная расстановка
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Подробная карта — в [PROJECT_MAP.md](PROJECT_MAP.md).
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Ключевые соглашения:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+* Поле — объект `{ column0: FieldCell[10], …, column9: FieldCell[10] }`.
+* Координата клетки — строка `"<колонка><строка>"`, например `"37"`.
+* Идентификатор корабля — `"<палубы>.<номер>"`, например `"4.0"`.
+* Флот — `1×4 + 2×3 + 3×2 + 4×1` (`ShipList`: `deck4`, `deck3`, `deck2`, `deck1`).
+* Логика ходов — чистые функции в `move-model/`: они получают снимок состояния и возвращают новый, не мутируя входные структуры.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Тесты
 
-## Learn More
+```bash
+npm test
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Покрыты: модель поля и проверка координат, состав флота, случайная расстановка (границы, пересечения, соседство), условие победы и выбор целей компьютером.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+> В ограниченной песочнице Jest не может порождать рабочие процессы и падает с `spawn EPERM`. Там запускайте `npx jest --runInBand`.
 
-### Code Splitting
+## Известные ограничения
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+* **Линт TypeScript не работает.** ESLint 7 не разбирает `.ts`/`.tsx` без `@typescript-eslint/parser`, которого нет в зависимостях. Конфиг в `.eslintrc.yml` готов, но для запуска линта нужно добавить `@typescript-eslint/parser` и `@typescript-eslint/eslint-plugin`.
+* Реализован только одиночный режим; сетевой игры нет.
+* `prop-types` и `web-vitals` в зависимостях не используются.

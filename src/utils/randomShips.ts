@@ -1,4 +1,4 @@
-import { generateShipList, ShipList } from "./ships";
+import { generateShipList, Ship, ShipList } from "./ships";
 import { generateBasicGameFieldData, GameFieldData } from "./fields";
 
 const generateFieldValues = (): string[] => {
@@ -39,7 +39,7 @@ const generateRandomShipList = (
       return Math.floor(Math.random() * (max - min)) + min;
     };
 
-    const generateShipCoords = (ship: any, shipType: string): void => {
+    const generateShipCoords = (ship: Ship, shipType: string): void => {
       generateRandomOrientation(shipsData);
       const deckLength = +shipType.slice(-1);
       const startCoord =
@@ -73,29 +73,24 @@ const generateRandomShipList = (
 
     const removeBlockedField = (coords: string[]): void => {
       coords.forEach((coord) => {
-        let columnNumber = +coord.slice(0, 1);
-        let rowNumber = +coord.slice(1);
+        const columnNumber = +coord.slice(0, 1);
+        const rowNumber = +coord.slice(1);
 
-        const values: string[] = [];
-        values.push(coord);
-        values.push((columnNumber - 1).toString() + rowNumber.toString());
-        values.push((columnNumber + 1).toString() + rowNumber.toString());
-        values.push(columnNumber.toString() + (rowNumber - 1).toString());
-        values.push(columnNumber.toString() + (rowNumber - 1).toString());
-        values.push((columnNumber + 1).toString() + (rowNumber + 1).toString());
-        values.push((columnNumber - 1).toString() + (rowNumber - 1).toString());
-        values.push((columnNumber - 1).toString() + (rowNumber - 1).toString());
-        values.push((columnNumber + 1).toString() + (rowNumber - 1).toString());
-        values.push((columnNumber - 1).toString() + (rowNumber + 1).toString());
+        // Сама клетка и все восемь соседей — ровно то, что помечается isBlocked при постановке корабля.
+        for (let columnOffset = -1; columnOffset <= 1; columnOffset++) {
+          for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+            const neighbour =
+              (columnNumber + columnOffset).toString() +
+              (rowNumber + rowOffset).toString();
+            const valueIndex = fieldValues.findIndex(
+              (fieldValue) => fieldValue === neighbour
+            );
 
-        values.forEach((value) => {
-          const valueIndex = fieldValues.findIndex(
-            (fieldValue) => fieldValue === value
-          );
-          if (valueIndex > -1) {
-            fieldValues.splice(valueIndex, 1);
+            if (valueIndex > -1) {
+              fieldValues.splice(valueIndex, 1);
+            }
           }
-        });
+        }
       });
     };
 

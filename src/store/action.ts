@@ -1,4 +1,7 @@
-import { GameModeType, WinnerType } from "../const";
+import type { GameModeType, WinnerType } from "../const";
+import type { GameFieldData } from "../utils/fields";
+import type { Ship, ShipList } from "../utils/ships";
+import type { SingleplayerGameState } from "./reducers/singleplayer-game/singleplayer-game";
 
 export const ActionType = {
   CHANGE_GAME_MODE: `CHANGE_GAME_MODE`,
@@ -19,80 +22,121 @@ export const ActionType = {
   UPDATE_OPPONENT_SHIPS: `UPDATE_OPPONENT_SHIPS`,
   UPDATE_OPPONENT_FIELD: `UPDATE_OPPONENT_FIELD`,
   SET_WINNER: `SET_WINNER`,
-  RESET_SINGLEPLAYER_SETTINGS: `RESET_SINGLEPLAYER_SETTINGS`
+  RESET_SINGLEPLAYER_SETTINGS: `RESET_SINGLEPLAYER_SETTINGS`,
 } as const;
 
-export interface Action {
-  type: string;
-  payload?: any;
+/** Корабль, который игрок ставит на поле. Пока корабль не выбран — пустой объект. */
+export type ShipOnPlace = Ship | {};
+
+export interface PlaceShipPayload {
+  shipTypeOnPlace: number;
+  playerShipsData: ShipList;
+  isAllShipPlaced: boolean;
 }
+
+/** Аргумент обработчика расстановки в `UserField`. */
+export interface PlaceShipRequest extends PlaceShipPayload {
+  playerField: GameFieldData;
+  currentShipOnPlace: ShipOnPlace;
+}
+
+export interface PlaceComputerShipsPayload {
+  fieldsData: GameFieldData;
+  shipsData: ShipList;
+}
+
+export interface WinnerPayload {
+  winner: WinnerType | string;
+  isGameOver: boolean;
+}
+
+export type Action =
+  | { type: typeof ActionType.CHANGE_GAME_MODE; payload: GameModeType }
+  | { type: typeof ActionType.RESET_USER_SHIPS }
+  | { type: typeof ActionType.RESET_USER_FIELD }
+  | { type: typeof ActionType.RESET_OPPONENT_SHIPS }
+  | { type: typeof ActionType.RESET_OPPONENT_FIELD }
+  | { type: typeof ActionType.RESET_GAME_MODE }
+  | { type: typeof ActionType.UPDATE_USER_FIELD; payload: GameFieldData }
+  | { type: typeof ActionType.UPDATE_SHIP_ON_PLACE; payload: ShipOnPlace }
+  | { type: typeof ActionType.ALL_SHIPS_PLACED }
+  | { type: typeof ActionType.SHIP_PLACED; payload: PlaceShipPayload }
+  | { type: typeof ActionType.GENERATE_RANDOM_SHIPS }
+  | { type: typeof ActionType.PLACE_COMPUTER_SHIPS; payload: PlaceComputerShipsPayload }
+  | { type: typeof ActionType.OPPONENT_SHIP_PLACED }
+  | { type: typeof ActionType.UPDATE_USER_SHIPS; payload: ShipList }
+  | { type: typeof ActionType.UPDATE_SINGLEPLAYER_GAME; payload: Partial<SingleplayerGameState> }
+  | { type: typeof ActionType.UPDATE_OPPONENT_SHIPS; payload: ShipList | {} }
+  | { type: typeof ActionType.UPDATE_OPPONENT_FIELD; payload: GameFieldData }
+  | { type: typeof ActionType.SET_WINNER; payload: WinnerPayload }
+  | { type: typeof ActionType.RESET_SINGLEPLAYER_SETTINGS };
 
 export const ActionCreator = {
   changeGameMode: (mode: GameModeType): Action => ({
-    type: `CHANGE_GAME_MODE`,
-    payload: mode
+    type: ActionType.CHANGE_GAME_MODE,
+    payload: mode,
   }),
   resetUserShips: (): Action => ({
-    type: `RESET_USER_SHIPS`,
+    type: ActionType.RESET_USER_SHIPS,
   }),
   resetUserField: (): Action => ({
-    type: `RESET_USER_FIELD`,
+    type: ActionType.RESET_USER_FIELD,
   }),
   resetOpponentShips: (): Action => ({
-    type: `RESET_OPPONENT_SHIPS`,
+    type: ActionType.RESET_OPPONENT_SHIPS,
   }),
   resetOpponentField: (): Action => ({
-    type: `RESET_OPPONENT_FIELD`,
+    type: ActionType.RESET_OPPONENT_FIELD,
   }),
   resetGameMode: (): Action => ({
-    type: `RESET_GAME_MODE`
+    type: ActionType.RESET_GAME_MODE,
   }),
-  updateOpponentShips: (newShipsData: any): Action => ({
-    type: `UPDATE_OPPONENT_SHIPS`,
-    payload: newShipsData
+  updateOpponentShips: (newShipsData: ShipList | {}): Action => ({
+    type: ActionType.UPDATE_OPPONENT_SHIPS,
+    payload: newShipsData,
   }),
-  updateOpponentField: (newField: any): Action => ({
-    type: `UPDATE_OPPONENT_FIELD`,
-    payload: newField
+  updateOpponentField: (newField: GameFieldData): Action => ({
+    type: ActionType.UPDATE_OPPONENT_FIELD,
+    payload: newField,
   }),
-  updateUserField: (newField: any): Action => ({
-    type: `UPDATE_USER_FIELD`,
-    payload: newField
+  updateUserField: (newField: GameFieldData): Action => ({
+    type: ActionType.UPDATE_USER_FIELD,
+    payload: newField,
   }),
-  updateUserShips: (updatedShipsData: any): Action => ({
-    type: `UPDATE_USER_SHIPS`,
-    payload: updatedShipsData
+  updateUserShips: (updatedShipsData: ShipList): Action => ({
+    type: ActionType.UPDATE_USER_SHIPS,
+    payload: updatedShipsData,
   }),
-  updateShipOnPlace: (newShip: any): Action => ({
-    type: `UPDATE_SHIP_ON_PLACE`,
-    payload: newShip
+  updateShipOnPlace: (newShip: ShipOnPlace): Action => ({
+    type: ActionType.UPDATE_SHIP_ON_PLACE,
+    payload: newShip,
   }),
   updateAllShipPlaced: (): Action => ({
-    type: `ALL_SHIPS_PLACED`    
+    type: ActionType.ALL_SHIPS_PLACED,
   }),
-  placeShip: (nextShipData: any): Action => ({
-    type: `SHIP_PLACED`,
-    payload: nextShipData
+  placeShip: (nextShipData: PlaceShipPayload): Action => ({
+    type: ActionType.SHIP_PLACED,
+    payload: nextShipData,
   }),
   generateComputerShips: (): Action => ({
-    type: `GENERATE_RANDOM_SHIPS`,
+    type: ActionType.GENERATE_RANDOM_SHIPS,
   }),
-  placeComputerShips: (opponentData: any): Action => ({
-    type: `PLACE_COMPUTER_SHIPS`,
-    payload: opponentData
+  placeComputerShips: (opponentData: PlaceComputerShipsPayload): Action => ({
+    type: ActionType.PLACE_COMPUTER_SHIPS,
+    payload: opponentData,
   }),
   opponentShipPlaced: (): Action => ({
-    type: `OPPONENT_SHIP_PLACED`
+    type: ActionType.OPPONENT_SHIP_PLACED,
   }),
-  updateSingleplayerGame: (newGameData: any): Action => ({
-    type: `UPDATE_SINGLEPLAYER_GAME`,
-    payload: newGameData
+  updateSingleplayerGame: (newGameData: Partial<SingleplayerGameState>): Action => ({
+    type: ActionType.UPDATE_SINGLEPLAYER_GAME,
+    payload: newGameData,
   }),
-  setWinner: (winnerData: {winner: WinnerType | string, isGameOver: boolean}): Action => ({
-    type: `SET_WINNER`,
-    payload: winnerData
+  setWinner: (winnerData: WinnerPayload): Action => ({
+    type: ActionType.SET_WINNER,
+    payload: winnerData,
   }),
   resetSingleplayerGameSettings: (): Action => ({
-    type: `RESET_SINGLEPLAYER_SETTINGS`,
-  })
+    type: ActionType.RESET_SINGLEPLAYER_SETTINGS,
+  }),
 };

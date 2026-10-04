@@ -2,13 +2,13 @@
 
 import { generateShipList, ShipList } from "../../../utils/ships";
 import { ActionType } from "../../action";
-import { Action } from "../../action";
+import { Action, ShipOnPlace } from "../../action";
 
 const DEFAULT_SHIP_TYPE = 4;
 
-interface PlayerShipsState {
+export interface PlayerShipsState {
   playerShipsData: ShipList;
-  currentShipOnPlace: any;
+  currentShipOnPlace: ShipOnPlace;
   shipTypeOnPlace: number;
   isAllShipPlaced: boolean;
 }

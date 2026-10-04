@@ -5,7 +5,7 @@ import { ShipList } from "../../../utils/ships";
 import { ActionType } from "../../action";
 import { Action } from "../../action";
 
-interface OpponentShipsState {
+export interface OpponentShipsState {
   opponentShipsData: ShipList | {};
 }
 

@@ -1,10 +1,10 @@
 import {ShotStatus} from "../const";
 import { generateRandomNumber } from "../utils/common";
-import { GameFieldData } from "../utils/fields";
-import { ShipList } from "../utils/ships";
+import { cloneGameFieldData, GameFieldData } from "../utils/fields";
+import { cloneShipList, ShipList } from "../utils/ships";
 import { SingleplayerGameState } from "../store/reducers/singleplayer-game/singleplayer-game";
 
-interface ComputerMoveResult {
+export interface ComputerMoveResult {
   playerField: GameFieldData;
   playerShipsData: ShipList;
   singleplayerGame: SingleplayerGameState;
@@ -19,9 +19,19 @@ export const generateComputerMove = (
   const generateRandomAimIndex = (): number =>
     generateRandomNumber(0, nextAimList.length);
 
-  const nextPlayerField = { ...playerField };
-  const shipsData = { ...playerShipsData };
-  const gameData = { ...singleplayerGameData };
+  const nextPlayerField = cloneGameFieldData(playerField);
+  const shipsData = cloneShipList(playerShipsData);
+  // Копируем и вложенные структуры: очередь целей и списки направлений мутируются ниже.
+  const gameData: SingleplayerGameState = {
+    ...singleplayerGameData,
+    aimList: [ ...singleplayerGameData.aimList ],
+    intendedAims: {
+      verticalUp: [ ...singleplayerGameData.intendedAims.verticalUp ],
+      verticalDown: [ ...singleplayerGameData.intendedAims.verticalDown ],
+      horizontalUp: [ ...singleplayerGameData.intendedAims.horizontalUp ],
+      horizontalDown: [ ...singleplayerGameData.intendedAims.horizontalDown ],
+    },
+  };
 
   const changeDirection = (gameData: SingleplayerGameState): void => {
     gameData.isDirectionToUpper = !gameData.isDirectionToUpper;
@@ -222,556 +232,86 @@ export const generateComputerMove = (
       const generateIntendedAims = (): void => {
         gameData.computerLastShot = aimNumber[0];
 
+        const intendedAims = gameData.intendedAims;
+        const hasIntendedAims =
+          intendedAims.verticalUp.length > 0 ||
+          intendedAims.verticalDown.length > 0 ||
+          intendedAims.horizontalUp.length > 0 ||
+          intendedAims.horizontalDown.length > 0;
+
+        if (hasIntendedAims) {
+          return;
+        }
+
+        const column = +gameData.computerLastShot.slice(0, 1);
+        const row = +gameData.computerLastShot.slice(1);
+        const deckLength = +shipOnFire.id.slice(0, 1);
+
+        // Четыре продолжения раненого корабля: куда шагать от клетки попадания.
+        const directions: {
+          aim: keyof SingleplayerGameState["intendedAims"];
+          columnStep: number;
+          rowStep: number;
+        }[] = [
+          { aim: `horizontalUp`, columnStep: 1, rowStep: 0 },
+          { aim: `horizontalDown`, columnStep: -1, rowStep: 0 },
+          { aim: `verticalUp`, columnStep: 0, rowStep: 1 },
+          { aim: `verticalDown`, columnStep: 0, rowStep: -1 },
+        ];
+
+        directions.forEach(({ aim, columnStep, rowStep }) => {
+          const aims = intendedAims[aim];
+
+          // Идём в одну сторону, пока не упрёмся в край поля или в уже отстрелянную клетку.
+          for (let step = 1; step < deckLength; step++) {
+            const nextColumn = column + columnStep * step;
+            const nextRow = row + rowStep * step;
+            const isOutOfField =
+              nextColumn < 0 || nextColumn > 9 || nextRow < 0 || nextRow > 9;
+
+            if (isOutOfField) {
+              break;
+            }
+
+            const nextCoord = nextColumn.toString() + nextRow.toString();
+
+            if (nextAimList.indexOf(nextCoord) === -1) {
+              break;
+            }
+
+            aims.push(nextCoord);
+          }
+        });
+
+        if (intendedAims.verticalUp.length === 0) {
+          gameData.isVertical = true;
+          gameData.isDirectionToUpper = false;
+        }
+        if (intendedAims.verticalDown.length === 0) {
+          gameData.isVertical = true;
+          gameData.isDirectionToUpper = true;
+        }
         if (
-          gameData.intendedAims.verticalUp.length === 0 &&
-          gameData.intendedAims.verticalDown.length === 0 &&
-          gameData.intendedAims.horizontalUp.length === 0 &&
-          gameData.intendedAims.horizontalDown.length === 0
+          intendedAims.verticalUp.length === 0 &&
+          intendedAims.verticalDown.length === 0
         ) {
-          let column = gameData.computerLastShot.slice(0, 1);
-          let row = gameData.computerLastShot.slice(1);
-          let columnUp = column;
-          let columnDown = column;
-          let rowUp = row;
-          let rowDown = row;
+          gameData.isVertical = false;
+          gameData.isDirectionToUpper = true;
+        }
 
-          const checkCoords = (coord: string): number =>
-            nextAimList.findIndex((aimCoord) => aimCoord === coord);
-
-          if (+column === 0 && +row === 0) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnUp + 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalUp.length > 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(column + (+rowUp + 1).toString());
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalUp.length > 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnUp < 9) {
-                columnUp = (+columnUp + 1).toString();
-              }
-              if (+rowUp < 9) {
-                rowUp = (+rowUp + 1).toString();
-              }
-            }
-          }
-
-          if (+column === 9 && +row === 0) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnDown - 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalDown.length > 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(column + (+rowUp + 1).toString());
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalUp.length > 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnDown > 0) {
-                columnDown = (+columnDown - 1).toString();
-              }
-              if (+rowUp < 9) {
-                rowUp = (+rowUp + 1).toString();
-              }
-            }
-          }
-
-          if (+column === 9 && +row === 9) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnDown - 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalDown.length > 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                column + (+rowDown - 1).toString()
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalDown.length > 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnDown > 0) {
-                columnDown = (+columnDown - 1).toString();
-              }
-              if (+rowUp > 0) {
-                rowUp = (+rowUp - 1).toString();
-              }
-            }
-          }
-
-          if (+column === 0 && +row === 9) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnUp + 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalUp.length > 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                column + (+rowDown - 1).toString()
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalDown.length > 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnUp < 9) {
-                columnUp = (+columnUp + 1).toString();
-              }
-              if (+rowDown > 0) {
-                rowDown = (+rowDown - 1).toString();
-              }
-            }
-          }
-
-          if (+column > 0 && +column < 9 && +row === 0) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnUp + 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalUp.length > 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                (+columnDown - 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalDown.length > 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(column + (+rowUp + 1).toString());
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalUp.length > 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                column + (+rowDown - 1).toString()
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalDown.length > 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnUp < 9) {
-                columnUp = (+columnUp + 1).toString();
-              }
-              if (+columnDown > 0) {
-                columnDown = (+columnDown - 1).toString();
-              }
-              if (+rowUp < 9) {
-                rowUp = (+rowUp + 1).toString();
-              }
-            }
-          }
-
-          if (+column > 0 && +column < 9 && +row === 9) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnUp + 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalUp.length > 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                (+columnDown - 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalDown.length > 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                column + (+rowDown - 1).toString()
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalDown.length > 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnUp < 9) {
-                columnUp = (+columnUp + 1).toString();
-              }
-              if (+columnDown > 0) {
-                columnDown = (+columnDown - 1).toString();
-              }
-              if (+rowDown > 0) {
-                rowDown = (+rowDown - 1).toString();
-              }
-            }
-          }
-
-          if (+column === 0 && +row > 0 && +row < 9) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnUp + 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalUp.length > 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(column + (+rowUp + 1).toString());
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalUp.length > 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                column + (+rowDown - 1).toString()
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalDown.length > 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnUp < 9) {
-                columnUp = (+columnUp + 1).toString();
-              }
-              if (+rowUp < 9) {
-                rowUp = (+rowUp + 1).toString();
-              }
-              if (+rowDown > 0) {
-                rowDown = (+rowDown - 1).toString();
-              }
-            }
-          }
-
-          if (+column === 9 && +row > 0 && +row < 9) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnDown - 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalDown.length > 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(column + (+rowUp + 1).toString());
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalUp.length > 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                column + (+rowDown - 1).toString()
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalDown.length > 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnDown > 0) {
-                columnDown = (+columnDown - 1).toString();
-              }
-              if (+rowUp < 9) {
-                rowUp = (+rowUp + 1).toString();
-              }
-              if (+rowDown > 0) {
-                rowDown = (+rowDown - 1).toString();
-              }
-            }
-          }
-
-          if (+column > 0 && +column < 9 && +row > 0 && +row < 9) {
-            for (let i = 0; i < +shipOnFire.id.slice(0, 1) - 1; i++) {
-              let checkedCoordIndex = checkCoords(
-                (+columnUp + 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalUp.length > 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                (+columnDown - 1).toString() + row
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.horizontalDown.length > 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.horizontalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(column + (+rowUp + 1).toString());
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalUp.length > 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalUp.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              checkedCoordIndex = checkCoords(
-                column + (+rowDown - 1).toString()
-              );
-              if (checkedCoordIndex !== -1) {
-                if (i > 0 && gameData.intendedAims.verticalDown.length > 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-                if (i === 0) {
-                  gameData.intendedAims.verticalDown.push(
-                    nextAimList[checkedCoordIndex]
-                  );
-                }
-              }
-
-              if (+columnUp < 9) {
-                columnUp = (+columnUp + 1).toString();
-              }
-              if (+columnDown > 0) {
-                columnDown = (+columnDown - 1).toString();
-              }
-              if (+rowUp < 9) {
-                rowUp = (+rowUp + 1).toString();
-              }
-              if (+rowDown > 0) {
-                rowDown = (+rowDown - 1).toString();
-              }
-            }
-          }
-          if (gameData.intendedAims.verticalUp.length === 0) {
-            gameData.isVertical = true;
-            gameData.isDirectionToUpper = false;
-          }
-          if (gameData.intendedAims.verticalDown.length === 0) {
-            gameData.isVertical = true;
-            gameData.isDirectionToUpper = true;
-          }
-          if (
-            gameData.intendedAims.verticalUp.length === 0 &&
-            gameData.intendedAims.verticalDown.length === 0
-          ) {
-            gameData.isVertical = false;
-            gameData.isDirectionToUpper = true;
-          }
-
-          if (gameData.intendedAims.horizontalUp.length === 0) {
-            gameData.isVertical = false;
-            gameData.isDirectionToUpper = false;
-          }
-          if (gameData.intendedAims.horizontalDown.length === 0) {
-            gameData.isVertical = false;
-            gameData.isDirectionToUpper = true;
-          }
-          if (
-            gameData.intendedAims.horizontalUp.length === 0 &&
-            gameData.intendedAims.horizontalDown.length === 0
-          ) {
-            gameData.isVertical = true;
-          }
+        if (intendedAims.horizontalUp.length === 0) {
+          gameData.isVertical = false;
+          gameData.isDirectionToUpper = false;
+        }
+        if (intendedAims.horizontalDown.length === 0) {
+          gameData.isVertical = false;
+          gameData.isDirectionToUpper = true;
+        }
+        if (
+          intendedAims.horizontalUp.length === 0 &&
+          intendedAims.horizontalDown.length === 0
+        ) {
+          gameData.isVertical = true;
         }
       };
 

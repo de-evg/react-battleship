@@ -32,3 +32,21 @@ export const generateShipList = (): ShipList => {
   };
   return CompShipList;
 };
+
+/** Копия корабля вместе с массивами `coords` и `hits`, которые мутируются по ходу игры. */
+export const cloneShip = (ship: Ship): Ship => {
+  const clonedShip = new Ship(ship.id);
+  clonedShip.coords = [...ship.coords];
+  clonedShip.hits = [...ship.hits];
+  clonedShip.isVertical = ship.isVertical;
+  clonedShip.isPlaced = ship.isPlaced;
+  clonedShip.isDestroyed = ship.isDestroyed;
+  return clonedShip;
+};
+
+export const cloneShipList = (shipsData: ShipList): ShipList => ({
+  deck4: shipsData.deck4.map(cloneShip),
+  deck3: shipsData.deck3.map(cloneShip),
+  deck2: shipsData.deck2.map(cloneShip),
+  deck1: shipsData.deck1.map(cloneShip),
+});
